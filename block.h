@@ -48,7 +48,8 @@ ostream& operator<<(ostream& os, const Block<T>& block){
 template <typename T>
 void Block<T>::update_hash()
 {
-    hash = Sha256<T,size_t>{}(data, nonce);
+    static Sha256<T,size_t> hasher;
+    hash = hasher(data, nonce);
     is_valid = hash.starts_with("00");
 }
 
