@@ -5,24 +5,42 @@
 
 using namespace std;
 
-struct TransactionData
+struct Transaction
 {
     string sender;
     string receiver;
     time_t time_stamp;
     double amount; // CapyCoins! :)
 
-    TransactionData(string sender, string receiver, double amount);
+    Transaction();
+    Transaction(string sender, string receiver, double amount);
 };
 
-TransactionData::TransactionData(string sender, string receiver, double amount){
+struct Transfer : public Transaction 
+{
+
+};
+
+struct Withdrawal : public Transaction
+{
+
+};
+
+Transaction::Transaction(){
+    this->sender = "NULL";
+    this->receiver = "NULL";
+    this->amount = 0.0;
+    this->time_stamp = time(nullptr);
+}
+
+Transaction::Transaction(string sender, string receiver, double amount){
     this->sender = sender;
     this->receiver = receiver;
     this->amount = amount;
     this->time_stamp = time(nullptr);
 }
 
-ostream& operator<<(ostream& os, const TransactionData& transaction)
+ostream& operator<<(ostream& os, const Transaction& transaction)
 {
     os << "\tAmount: " << transaction.amount << " CapyCoins\n";
     os << "\tDate: " << ctime(&transaction.time_stamp);
