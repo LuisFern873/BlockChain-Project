@@ -12,8 +12,22 @@
 
 ## 3. Description
 
+It allows users ...
+- to register transactions in a safe way.
+- make optimized queries through efficient indexing. 
 
-## 4. Proof of work
+
+
+## 4. Proof of work system
+
+
+Computing hash
+
+
+![](hash.png "Sha256")
+
+
+
 
 
 
