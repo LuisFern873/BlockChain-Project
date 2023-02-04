@@ -1,15 +1,21 @@
-# include <iostream>
-# include "sha256.h"
+# include "client.h"
 
 using namespace std;
 
 int main()
 {
-    string message = "Hello, world!";
+    string data = "hello, world!";
+    string hash = Sha256<string,int>{}(data,10);
+    cout << hash << "\n";
+    cout << hash.length() << "\n";
 
-    cout << Sha256<string>{}(message) << "\n";
+    // Block<string> GenesisBlock(data);
 
-    // 315f5bdb76d078c43b8ac0064e4a0164612b1fce77c869345bfc94c75894edd3
+    // cout << "Before mining\n" << GenesisBlock << endl;
+
+    // Client::mine<string>(GenesisBlock);
+
+    // cout << "After mining\n" << GenesisBlock << endl;
 
     return 0;
 }

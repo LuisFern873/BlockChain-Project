@@ -2,44 +2,42 @@
 # define SHA256_H
 
 # include <iostream>
-# include <string>
-# include <iomanip> 
+# include <sstream>
 # include <openssl/sha.h>
 
 using namespace std;
 
-template <typename T>
+template <typename... Types>
 class Sha256
 {
     public:
-        string operator()(T data);
+        string operator()(Types... data);
 
     private:
-        string stringify(T data);
+        string stringify(Types... data);
         unsigned char* sha256_init(string data);
         string sha256_final(unsigned char* initial_hash);
 };
 
-template <typename T>
-string Sha256<T>::operator()(T data)
+template <typename... Types>
+string Sha256<Types...>::operator()(Types... data)
 {
-    auto str_data = stringify(data);
+    auto str_data = stringify(data...);
     auto initial_hash = sha256_init(str_data);
     auto final_hash = sha256_final(initial_hash);
     return final_hash;
 }
 
-template <typename T>
-string Sha256<T>::stringify(T data)
+template <typename... Types>
+string Sha256<Types...>::stringify(Types... data)
 {
-    if constexpr (is_convertible_v<T, string>) 
-        return data;
-    else 
-        return to_string(data);
+    stringstream stream;
+    (stream << ... << data);
+    return stream.str();
 }
 
-template <typename T>
-unsigned char* Sha256<T>::sha256_init(string data)
+template <typename... Types>
+unsigned char* Sha256<Types...>::sha256_init(string data)
 {
     auto initial_hash = new unsigned char[SHA256_DIGEST_LENGTH];
     auto uchar_data = reinterpret_cast<const unsigned char*>(data.c_str());
@@ -47,8 +45,8 @@ unsigned char* Sha256<T>::sha256_init(string data)
     return initial_hash;
 }
 
-template <typename T>
-string Sha256<T>::sha256_final(unsigned char* initial_hash)
+template <typename... Types>
+string Sha256<Types...>::sha256_final(unsigned char* initial_hash)
 {
     stringstream final_hash;
     for(int i = 0; i < SHA256_DIGEST_LENGTH; ++i)
