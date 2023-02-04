@@ -15,6 +15,7 @@ class BlockChain
 
     private:
     CircularList<Block<T>*> chain;
+    void create_genesis();
 
 };
 
@@ -41,6 +42,12 @@ void BlockChain<T>::display(ostream& os)
         os << **iterator << "\n";
         ++iterator;
     }
+}
+
+template <typename T>
+void BlockChain<T>::create_genesis()
+{
+    
 }
 
 
