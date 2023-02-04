@@ -42,6 +42,7 @@ ostream& operator<<(ostream& os, const Block<T>& block){
     os << "Nonce: " << block.nonce << "\n";
     os << "Transaction data:\n" << block.data;
     os << "Hash: " << block.hash << "\n";
+    os << "Previous hash: " << block.previous_hash << "\n";
     os << "Valid: " << boolalpha << block.is_valid << "\n";
     return os;
 }

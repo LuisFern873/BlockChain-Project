@@ -15,3 +15,5 @@
 
 ## 4. Proof of work
 
+
+

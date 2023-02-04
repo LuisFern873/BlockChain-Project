@@ -11,7 +11,7 @@ class BlockChain
     public:
     BlockChain();
     void insert(T data);
-    void display();
+    void display(ostream& os = cout);
 
     private:
     CircularList<Block<T>*> chain;
@@ -34,11 +34,11 @@ void BlockChain<T>::insert(T data)
 }
 
 template <typename T>
-void BlockChain<T>::display()
+void BlockChain<T>::display(ostream& os)
 {
     auto iterator = chain.begin();
     while(iterator != chain.end()){
-        cout << **iterator << "\n";
+        os << **iterator << "\n";
         ++iterator;
     }
 }
