@@ -4,6 +4,8 @@
 class Menu
 {
     public:
+    Menu();
+    void display();
 
     private:
 };

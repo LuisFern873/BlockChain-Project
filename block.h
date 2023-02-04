@@ -10,9 +10,11 @@ template <typename T>
 class Block
 {
     public:
-    T data;
+    size_t id;
     size_t nonce;
+    T data; // Transaction data
     string hash;
+    string previous_hash;
     bool is_valid;
 
     Block(T data) : data(data), nonce(0){
@@ -24,19 +26,24 @@ class Block
         update_hash();
     }
 
-    friend ostream& operator<<(ostream& os, const Block& block){
-        os << "Data: " << block.data << "\n";
-        os << "Nonce: " << block.nonce << "\n";
-        os << "Hash: " << block.hash << "\n";
-        os << "Valid: " << boolalpha << block.is_valid << "\n";
-        return os;
-    }
+    template <typename T1>
+    friend ostream& operator<<(ostream& os, const Block<T1>& block);
 
     private:
     void update_hash(){
-        hash = Sha256<T>{}(data, nonce);
+        hash = Sha256<T,size_t>{}(data, nonce);
         is_valid = hash.starts_with("00");
     }
 };
+
+template <typename T>
+ostream& operator<<(ostream& os, const Block<T>& block){
+    os << "id: " << block.id << "\n";
+    os << "Nonce: " << block.nonce << "\n";
+    os << "Transaction data:\n" << block.data;
+    os << "Hash: " << block.hash << "\n";
+    os << "Valid: " << boolalpha << block.is_valid << "\n";
+    return os;
+}
 
 # endif // BLOCK_H

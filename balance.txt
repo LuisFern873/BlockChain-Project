@@ -1,0 +1,5 @@
+Fernando,100
+Julian,50
+Pierina,70
+Mauricio,20
+Luciana,130
