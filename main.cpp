@@ -1,21 +1,26 @@
-# include "client.h"
+
+# include "blockchain.h"
+
+# include "tester.h"
 
 using namespace std;
 
 int main()
 {
-    string data = "hello, world!";
-    string hash = Sha256<string,int>{}(data,10);
-    cout << hash << "\n";
-    cout << hash.length() << "\n";
+    BlockChain<TransactionData> chain;
 
-    // Block<string> GenesisBlock(data);
+    TransactionData t1("Luis", "Pierina", 100);
+    TransactionData t2("Stuart", "Mario", 20);
+    TransactionData t3("Luciana", "Pablo", 50);
 
-    // cout << "Before mining\n" << GenesisBlock << endl;
+    chain.insert(t1);
+    chain.insert(t2);
+    chain.insert(t3);
 
-    // Client::mine<string>(GenesisBlock);
+    chain.display();
 
-    // cout << "After mining\n" << GenesisBlock << endl;
+
+
 
     return 0;
 }
