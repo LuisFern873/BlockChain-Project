@@ -15,6 +15,51 @@ struct Node
 };
 
 template <typename T>
+class CirculatListIterator
+{
+    public:
+        CirculatListIterator();
+        CirculatListIterator(Node<T>* node);
+        bool operator!=(const CirculatListIterator& other);
+        CirculatListIterator& operator++();
+        CirculatListIterator& operator--();
+        T& operator*();
+
+    private:
+        Node<T>* current;
+};
+
+template <typename T>
+class CircularList
+{
+    public:
+        CircularList();
+        ~CircularList();
+        T& front();
+        T& back();
+        void push_front(T data);
+        void push_back(T data);
+        T pop_front();
+        T pop_back();
+        T insert(T data, int pos);
+        bool remove(int pos);
+        T& operator[](int pos);
+        bool is_empty();
+        int size();
+        void clear();
+
+        typedef CirculatListIterator<T> iterator;
+        iterator begin();
+        iterator end();
+
+    private:
+        Node<T>* head; // sentinel
+        int nodes;
+};
+
+// Node implementation
+
+template <typename T>
 Node<T>::Node()
 {
     next = nullptr;
@@ -29,20 +74,7 @@ Node<T>::Node(T value)
     prev = nullptr;
 }
 
-template <typename T>
-class CirculatListIterator
-{
-    public:
-        CirculatListIterator();
-        CirculatListIterator(Node<T>* node);
-        bool operator!=(const CirculatListIterator& other);
-        CirculatListIterator& operator++();
-        CirculatListIterator& operator--();
-        T& operator*();
-
-    private:
-        Node<T>* current;
-};
+// Circular List Iterator implementation
 
 template <typename T>
 CirculatListIterator<T>::CirculatListIterator()
@@ -82,33 +114,7 @@ T& CirculatListIterator<T>::operator*()
     return current->data;
 }
 
-template <typename T>
-class CircularList
-{
-    public:
-        CircularList();
-        ~CircularList();
-        T& front();
-        T& back();
-        void push_front(T data);
-        void push_back(T data);
-        T pop_front();
-        T pop_back();
-        T insert(T data, int pos);
-        bool remove(int pos);
-        T& operator[](int pos);
-        bool is_empty();
-        int size();
-        void clear();
-
-        typedef CirculatListIterator<T> iterator;
-        iterator begin();
-        iterator end();
-
-    private:
-        Node<T>* head; // sentinel
-        int nodes;
-};
+// Circular List implementation
 
 template <typename T>
 CircularList<T>::CircularList()
