@@ -26,6 +26,15 @@ Computing hash
 
 ![](hash.png "Sha256")
 
+```cpp
+template <typename T>
+void Block<T>::update_hash()
+{
+    hash = Sha256<T,size_t>{}(data, nonce);
+    is_valid = hash.starts_with("00");
+}
+```
+
 
 
 

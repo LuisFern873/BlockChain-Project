@@ -30,10 +30,7 @@ class Block
     friend ostream& operator<<(ostream& os, const Block<T1>& block);
 
     private:
-    void update_hash(){
-        hash = Sha256<T,size_t>{}(data, nonce);
-        is_valid = hash.starts_with("00");
-    }
+    void update_hash();
 };
 
 template <typename T>
@@ -45,6 +42,14 @@ ostream& operator<<(ostream& os, const Block<T>& block){
     os << "Previous hash: " << block.previous_hash << "\n";
     os << "Valid: " << boolalpha << block.is_valid << "\n";
     return os;
+}
+
+
+template <typename T>
+void Block<T>::update_hash()
+{
+    hash = Sha256<T,size_t>{}(data, nonce);
+    is_valid = hash.starts_with("00");
 }
 
 # endif // BLOCK_H
