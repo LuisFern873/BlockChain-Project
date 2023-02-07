@@ -5,49 +5,93 @@
 
 using namespace std;
 
-struct Transaction
+class Transaction
 {
-    string sender;
-    string receiver;
-    time_t time_stamp;
-    double amount; // CapyCoins! :)
+    protected:
+        double amount; // CapyCoins! :)
+        time_t time_stamp;
 
-    Transaction();
-    Transaction(string sender, string receiver, double amount);
+    public:
+        Transaction();
+        Transaction(double amount);
+        void print(ostream& os) const;
 };
 
-struct Transfer : public Transaction 
+class Transfer : public Transaction 
 {
+    private:
+        string sender;
+        string receiver;
 
+    public:
+        Transfer();
+        Transfer(double amount, string sender, string receiver);
+        void print(ostream& os) const;
 };
 
-struct Withdrawal : public Transaction
+Transaction::Transaction()
 {
-
-};
-
-Transaction::Transaction(){
-    this->sender = "NULL";
-    this->receiver = "NULL";
     this->amount = 0.0;
     this->time_stamp = time(nullptr);
 }
 
-Transaction::Transaction(string sender, string receiver, double amount){
-    this->sender = sender;
-    this->receiver = receiver;
+Transaction::Transaction(double amount)
+{
     this->amount = amount;
     this->time_stamp = time(nullptr);
 }
 
+void Transaction::print(ostream& os) const
+{
+    os << "\tAmount: " << amount << " CapyCoins\n";
+    os << "\tTime stamp: " << ctime(&time_stamp);
+}
+
+// Transfer implementation
+
+Transfer::Transfer() : Transaction()
+{
+    this->sender = "";
+    this->receiver = "";
+}
+
+Transfer::Transfer(double amount, string sender, string receiver) : Transaction(amount)
+{
+    this->sender = sender;
+    this->receiver = receiver;
+}
+
+void Transfer::print(ostream& os) const
+{
+    os << "\tAmount: " << amount << "CapyCoins\n";
+    os << "\tTime stamp: " << ctime(&time_stamp);
+    os << "\tSender: " << sender << "\n";
+    os << "\tReceiver: " << receiver << "\n";
+}
+
 ostream& operator<<(ostream& os, const Transaction& transaction)
 {
-    os << "\tAmount: " << transaction.amount << " CapyCoins\n";
-    os << "\tDate: " << ctime(&transaction.time_stamp);
-    os << "\tFrom: " << transaction.sender << "\n";
-    os << "\tTo: " << transaction.receiver << "\n";
+    transaction.print(os);
     return os;
 }
+
+// ostream& operator<<(ostream& os, const Transaction**& transaction)
+// {
+//     (*transaction)->print(os);
+//     return os;
+// }
+
+
+
+// class Withdrawal : public Transaction
+// {
+
+// };
+
+// class Deposit : public Transaction
+// {
+
+// };
 
 
 

@@ -12,7 +12,7 @@ struct Client
     static bool mine(Block<T>& block){
         cout << "Mining..." << "\n";
         const size_t MAX = 1'000'000;
-        for(size_t nonce = 0; nonce < MAX; ++nonce){
+        for(size_t nonce = 1; nonce < MAX; ++nonce){
             block.set_nonce(nonce);
             if(block.is_valid){
                 return true;
