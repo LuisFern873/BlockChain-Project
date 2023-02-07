@@ -10,14 +10,15 @@ template <typename T>
 class BlockChain
 {
     public:
-    BlockChain();
-    void insert(T data);
-    void display(ostream& os = cout);
+        BlockChain();
+        void insert(T data);
+        void display(ostream& os = cout);
 
     private:
-    CircularList<Block<T>*> chain;
-    void create_genesis();
+        CircularList<Block<T>*> chain;
+        void create_genesis();
 
+    friend class Indexing;
 };
 
 template <typename T>
@@ -48,6 +49,7 @@ void BlockChain<T>::display(ostream& os)
         ++iterator;
     }
 }
+
 
 template <typename T>
 void BlockChain<T>::create_genesis()
