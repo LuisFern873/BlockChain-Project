@@ -1,5 +1,5 @@
-# ifndef TRANSACTION_DATA_H
-# define TRANSACTION_DATA_H
+# ifndef RECORD_H
+# define RECORD_H
 
 # include <iostream>
 
@@ -71,4 +71,4 @@ ostream& operator<<(ostream& os, const Record& record)
 }
 
 
-# endif // TRANSACTION_DATA_H
+# endif // RECORD_H

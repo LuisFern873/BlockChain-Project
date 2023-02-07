@@ -3,6 +3,7 @@
 
 # include "block.h"
 # include "record.h"
+# include "client.h"
 # include "circularlist.h"
 
 template <typename T>
@@ -30,9 +31,12 @@ void BlockChain<T>::insert(T data)
 {
     auto block = new Block<T>(data);
     block->id = chain.size();
-    block->previous_hash = chain.front()->hash;
-    // Proof of work missing
-    chain.push_back(block);
+    block->previous_hash = chain.back()->hash;
+
+    if (Client::mine<T>(block))
+        chain.push_back(block);
+    else
+        cout << "Block not mined!\n";
 }
 
 template <typename T>
@@ -51,7 +55,11 @@ void BlockChain<T>::create_genesis()
     auto genesis = new Block<T>(T());
     genesis->id = 0;
     genesis->previous_hash = string(64, '0');
-    chain.push_front(genesis);
+
+    if (Client::mine<T>(genesis))
+        chain.push_front(genesis);
+    else
+        cout << "Block not mined!\n";
 }
 
 
