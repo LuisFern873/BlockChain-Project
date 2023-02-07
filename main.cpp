@@ -6,7 +6,7 @@ using namespace std;
 
 int main()
 {
-    BlockChain<Transaction> chain;
+    BlockChain<Transfer> chain;
 
     chain.insert(Transfer(100, "Luis", "Pierina"));
     chain.insert(Transfer(20, "Stuart", "Mario"));

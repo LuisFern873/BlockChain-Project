@@ -2,7 +2,7 @@
 # define BLOCK_CHAIN_H
 
 # include "block.h"
-# include "transaction.h"
+# include "record.h"
 # include "circularlist.h"
 
 template <typename T>
