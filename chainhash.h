@@ -6,9 +6,6 @@
 
 using namespace std;
 
-const int MAX_COLLISIONS = 3;
-const float MAX_LOAD_FACTOR = 0.5;
-
 template <typename K, typename V>
 struct Entry
 {
@@ -32,81 +29,25 @@ ostream& operator<<(ostream& os, const Entry<K,V>& entry){
 template <typename K, typename V>
 class ChainHash
 {
-	private:    
+	public:
+    	ChainHash();
+		void insert(K key, V value);
+		void remove(K key);
+		V find(K key) const;
+		void display() const;
+
+	private:
 		forward_list<Entry<K,V>>* array;
 		int capacity;
 	    int size;
+		const int MAX_COLLISIONS = 3;
+		const float MAX_LOAD_FACTOR = 0.5;
 
-public:
-    ChainHash();
-
-	V& operator[](K key){
-
-		if(load_factor() >= MAX_LOAD_FACTOR){
-			rehashing();
-		}
-
-		size_t index = hash_function(key);
-		auto& chain = array[index];
-
-		for(auto& entry : chain){
-			if(entry.key == key){
-				return entry.value;
-			}
-		}
-
-		Entry entry = {key, V()};
-		chain.push_front(entry);
-		++size;
-		return chain.front().value;
-	}
-
-	void set(K key, V value){
-		operator[](key) = value;
-	}
-
-	V get(K key) const {
-		size_t index = hash_function(key);
-		auto& chain = array[index];
-
-		for(auto& entry : chain){
-			if(entry.key == key){
-				return entry.value;
-			}
-		}
-
-		cout << "Key " << quoted(key) << " not found\n"; 
-    }
-
-	void remove(K key){
-		size_t index = hash_function(key);
-		auto& chain = array[index];
-
-		auto count = chain.remove_if([&](const Entry<K,V>& entry){ 
-			return entry.key == key;
-		});
-
-		if(!count){
-			cout << "Key " << quoted(key) << " not found\n"; 
-		}
-    }
-
-	void display() const;
-
-private:
-
-	float load_factor(){
-		return float(size) / (float(capacity) * float(MAX_COLLISIONS));
-	}
-
-	size_t hash_function(K key){
-		static hash<K> hasher{};
-		return hasher(key) % capacity;
-	}
-
-	void rehashing();
+		float load_factor();
+		size_t hash_function(K key);
+		V& operator[](K key);
+		void rehashing();
 };
-
 
 template <typename K, typename V>
 ChainHash<K,V>::ChainHash()
@@ -114,6 +55,62 @@ ChainHash<K,V>::ChainHash()
 	capacity = 10; 
 	array = new forward_list<Entry<K,V>>[capacity];
 	size = 0;
+}
+
+template <typename K, typename V>
+V& ChainHash<K,V>::operator[](K key)
+{
+
+	if(load_factor() >= MAX_LOAD_FACTOR){
+		rehashing();
+	}
+
+	size_t index = hash_function(key);
+	auto& chain = array[index];
+
+	for(auto& entry : chain){
+		if(entry.key == key){
+			return entry.value;
+		}
+	}
+
+	Entry entry = {key, V()};
+	chain.push_front(entry);
+	++size;
+	return chain.front().value;
+}
+
+template <typename K, typename V>
+void ChainHash<K,V>::insert(K key, V value){
+	operator[](key) = value;
+}
+
+template <typename K, typename V>
+V ChainHash<K,V>::find(K key) const {
+	size_t index = hash_function(key);
+	auto& chain = array[index];
+
+	for(auto& entry : chain){
+		if(entry.key == key){
+			return entry.value;
+		}
+	}
+
+	cout << "Key " << quoted(key) << " not found\n"; 
+}
+
+template <typename K, typename V>
+void ChainHash<K,V>::remove(K key){
+	size_t index = hash_function(key);
+	auto& chain = array[index];
+
+	auto count = chain.remove_if([&](const Entry<K,V>& entry){ 
+		return entry.key == key;
+	});
+
+	if(!count){
+		cout << "Key " << quoted(key) << " not found\n"; 
+	}
 }
 
 template <typename K, typename V>
@@ -129,6 +126,17 @@ void ChainHash<K,V>::display() const
 	    cout << "null\n";
 	}
 	cout << "\n";
+}
+
+template <typename K, typename V>
+float ChainHash<K,V>::load_factor(){
+	return float(size) / (float(capacity) * float(MAX_COLLISIONS));
+}
+
+template <typename K, typename V>
+size_t ChainHash<K,V>::hash_function(K key){
+	static hash<K> hasher{};
+	return hasher(key) % capacity;
 }
 
 template <typename K, typename V>

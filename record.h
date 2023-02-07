@@ -7,25 +7,25 @@ using namespace std;
 
 class Record
 {
-    protected:
-        time_t time_stamp;
-
     public:
         Record();
         virtual void print(ostream& os) const;
+    
+    protected:
+        time_t time_stamp;
 };
 
 class Transfer : public Record 
 {
-    private:
-        double amount; // CapyCoins! :)
-        string sender;
-        string receiver;
-
     public:
         Transfer();
         Transfer(double amount, string sender, string receiver);
         void print(ostream& os) const override;
+    
+    private:
+        double amount; // CapyCoins! :)
+        string sender;
+        string receiver;
 };
 
 // Record implementation
