@@ -34,7 +34,6 @@ class ChainHash
 
 		float load_factor();
 		size_t hash_function(K key);
-		V& operator[](K key);
 		void rehashing();
 };
 
@@ -62,12 +61,6 @@ ChainHash<K,V>::ChainHash()
 template <typename K, typename V>
 void ChainHash<K,V>::insert(K key, V value)
 {
-	operator[](key) = value;
-}
-
-template <typename K, typename V>
-V& ChainHash<K,V>::operator[](K key)
-{
 	if(load_factor() >= MAX_LOAD_FACTOR)
 		rehashing();
 
@@ -76,13 +69,12 @@ V& ChainHash<K,V>::operator[](K key)
 
 	for(auto& entry : chain){
 		if(entry.key == key)
-			return entry.value;
+			entry.value = value;
 	}
 
-	Entry entry = {key, V()};
+	Entry entry = {key, value};
 	chain.push_front(entry);
 	++size;
-	return chain.front().value;
 }
 
 template <typename K, typename V>
@@ -95,7 +87,7 @@ V ChainHash<K,V>::find(K key)
 		if(entry.key == key)
 			return entry.value;
 	}
-	throw invalid_argument("Key not found.");
+	throw invalid_argument("Key not found");
 }
 
 template <typename K, typename V>
@@ -109,7 +101,7 @@ void ChainHash<K,V>::remove(K key)
 	});
 
 	if(!count)
-		throw invalid_argument("Key not found.");
+		throw invalid_argument("Key not found");
 }
 
 template <typename K, typename V>

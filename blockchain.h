@@ -4,7 +4,7 @@
 # include "block.h"
 # include "record.h"
 # include "client.h"
-# include "circularlist.h"
+# include "structures/circularlist.h"
 
 template <typename T>
 class BlockChain

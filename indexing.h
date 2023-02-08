@@ -3,7 +3,7 @@
 
 # include <iostream>
 # include "blockchain.h"
-# include "chainhash.h"
+# include "structures/chainhash.h"
 # include "record.h"
 
 using namespace std;

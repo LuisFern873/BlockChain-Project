@@ -3,6 +3,8 @@
 
 # include <iostream>
 
+using namespace std;
+
 template <typename T>
 struct Node 
 {
@@ -135,7 +137,7 @@ template <typename T>
 T& CircularList<T>::front()
 {
     if(this->is_empty()){
-        throw std::runtime_error("Circular list is empty");
+        throw runtime_error("Circular list is empty");
     } 
     return head->next->data;
 }
@@ -144,7 +146,7 @@ template <typename T>
 T& CircularList<T>::back()
 {
     if(this->is_empty()){
-        throw std::runtime_error("Circular list is empty");
+        throw runtime_error("Circular list is empty");
     }
     return head->prev->data;
 }
@@ -175,7 +177,7 @@ template <typename T>
 T CircularList<T>::pop_front()
 {
     if(this->is_empty()){
-        throw std::runtime_error("Circular list is empty");
+        throw runtime_error("Circular list is empty");
     }
     auto front = head->next;
     T data = front->data;
@@ -192,7 +194,7 @@ template <typename T>
 T CircularList<T>::pop_back()
 {
     if(this->is_empty()){
-        throw std::runtime_error("Circular list is empty");
+        throw runtime_error("Circular list is empty");
     }
     auto back = head->prev;
     T data = back->data;
@@ -208,7 +210,7 @@ template <typename T>
 T CircularList<T>::insert(T data, int pos)
 {
     if(pos < 0 or pos > nodes){
-        throw std::runtime_error("Circular list index out of range");
+        throw runtime_error("Circular list index out of range");
     }
 
     auto previous = head;
@@ -231,7 +233,7 @@ template <typename T>
 bool CircularList<T>::remove(int pos)
 {
     if(pos < 0 or pos > nodes){
-        throw std::runtime_error("Circular list index out of range");
+        throw runtime_error("Circular list index out of range");
         return false;
     }
     auto previous = head;
@@ -250,7 +252,7 @@ template <typename T>
 T& CircularList<T>::operator[](int pos)
 {
     if(pos < 0 or nodes <= pos){
-        throw std::runtime_error("Forward list index out of range");
+        throw runtime_error("Forward list index out of range");
     }
     auto current = head->next;
     while(pos--){

@@ -1,5 +1,4 @@
 # include "blockchain.h"
-# include "chainhash.h"
 # include "indexing.h"
 # include "tester.h"
 

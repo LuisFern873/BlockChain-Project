@@ -1,7 +1,7 @@
 
 # CapyCoin BlockChain
 
-![](logo.png "Capyraba")
+![](assets/logo.png "Capyraba")
 
 ## 1. Introduction
 
@@ -24,7 +24,7 @@ It allows users ...
 Computing hash
 
 
-![](hash.png "Sha256")
+![](assets/hash.png "Sha256")
 
 ```cpp
 template <typename T>
