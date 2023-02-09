@@ -277,10 +277,6 @@ public:
         head = prev;
     }
 
-    string name(){
-        return "ForwardList";
-    }
-
     void display(ostream& os){
         auto current = head;
         while(current){

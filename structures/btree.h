@@ -7,4 +7,5 @@ Btree<string, record*> tree;
 tree.insert("D01", record[0]);
 
 */
+
 # endif // B_TREE_H
