@@ -5,6 +5,7 @@
 
 ## 1. Introduction
 
+BlockChain is powerful tool.
 
 ## 2. Objectives
 - Implement a BlockChain that supports CapyCoin cryptocurrency transactions using data structures. 
@@ -12,17 +13,13 @@
 
 ## 3. Description
 
-It allows users ...
-- to register transactions in a safe way.
-- make optimized queries through efficient indexing. 
-
-
+This application allows users ...
+- To register transactions in a safe way.
+- Make optimized queries through efficient indexing. 
 
 ## 4. Proof of work system
 
-
-Computing hash
-
+Computing hash:
 
 ![](assets/hash.png "Sha256")
 

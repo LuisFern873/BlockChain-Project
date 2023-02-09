@@ -4,7 +4,7 @@
 # include "block.h"
 # include "record.h"
 # include "client.h"
-# include "structures/circularlist.h"
+# include "structures/doublelist.h"
 
 template <typename T>
 class BlockChain
@@ -15,7 +15,7 @@ class BlockChain
         void display(ostream& os = cout);
 
     private:
-        CircularList<Block<T>*> chain;
+        DoubleList<Block<T>*> chain;
         void create_genesis();
 
     friend class Indexing;

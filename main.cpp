@@ -14,8 +14,10 @@ int main()
     chain.insert(Transfer(80, "Pedro", "Andy"));
     chain.insert(Transfer(60, "Carlos", "Carlota"));
 
+
+    chain.display();
     // Sender Hash Index
-    Indexing::sender_hash_index<Transfer>(chain);
+    // Indexing::sender_hash_index<Transfer>(chain);
 
 
     return 0;

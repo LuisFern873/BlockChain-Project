@@ -1,0 +1,4 @@
+# ifndef CIRCULAR_ARRAY_H
+# define CIRCULAR_ARRAY_H
+
+# endif // CIRCULAR_ARRAY_H
