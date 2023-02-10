@@ -21,9 +21,14 @@ class Transfer : public Record
         Transfer();
         Transfer(double amount, string sender, string receiver);
         void print(ostream& os) const override;
-        string get_sender(){ // For indexing
+
+        // For indexing
+        string get_sender(){ 
             return sender;
-        } 
+        }
+        string get_receiver(){
+            return receiver;
+        }
     
     private:
         double amount; // CapyCoins! :)

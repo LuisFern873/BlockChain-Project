@@ -18,7 +18,7 @@ class BlockChain
         DoubleList<Block<T>*> chain;
         void create_genesis();
 
-    friend class Indexing;
+    friend class Index;
 };
 
 template <typename T>
