@@ -2,13 +2,16 @@
 # define MENU_H
 
 # include <iostream>
+# include "blockchain.h"
 
 using namespace std;
 
 class Menu
 {
     private:
-        inline static Menu* instance = nullptr;
+        inline static Menu* menu = nullptr;
+        inline static BlockChain<Transfer>* chain;
+
         Menu() = default;
         struct Capybara
         {
@@ -16,7 +19,7 @@ class Menu
         };
 
     public:
-        static Menu* init();
+        static Menu* init(BlockChain<Transfer>* chain);
         void display_main();
 
     private:
@@ -24,11 +27,13 @@ class Menu
         void display_query();
 };
 
-Menu* Menu::init()
+Menu* Menu::init(BlockChain<Transfer>* cha)
 {
-    if(instance == nullptr) 
-        instance = new Menu();
-    return instance;
+    if (menu == nullptr) {
+        menu = new Menu();
+        chain = cha;
+    }
+    return menu;
 }
 
 void Menu::display_main()
@@ -107,6 +112,18 @@ void Menu::display_query()
     cout << "Enter option: ";
     short option;
     cin >> option;
+
+    switch (option)
+    {
+    case 7:
+        chain->display();
+        break;
+    case 8:
+        display_main();
+        break;
+    default:
+        break;
+    }
 }
 
 void Menu::Capybara::display()

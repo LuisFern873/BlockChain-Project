@@ -51,7 +51,7 @@ void Block<T>::set_nonce(size_t new_nonce)
 template <typename T>
 bool Block<T>::mine()
 {
-    cout << "Mining block #" << id << " ...\n";
+    // cout << "Mining block #" << id << " ...\n";
     const size_t MAX = 1'000'000;
     for (size_t nonce = 1; nonce < MAX; ++nonce) {
         set_nonce(nonce);
