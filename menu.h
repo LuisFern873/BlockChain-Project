@@ -58,9 +58,9 @@ void Menu::display_main()
         break;
     default:
         cout << "Enter a valid option.\n";
+        display_main();
         break;
     }
-    
 }
 
 void Menu::display_create()
@@ -102,7 +102,8 @@ void Menu::display_query()
     cout << "4) Contains ...\n";
     cout << "5) Max value ...\n";
     cout << "6) Min value ...\n";
-    cout << "7) Go back to main menu ⬅️\n";
+    cout << "7) Ledger ...\n";
+    cout << "8) Go back to main menu ⬅️\n";
     cout << "Enter option: ";
     short option;
     cin >> option;

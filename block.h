@@ -17,14 +17,10 @@ class Block
         string previous_hash;
         bool is_valid;
 
-        Block(T data) : data(data), nonce(0){
-            update_hash(); 
-        }
-
-        void set_nonce(size_t new_nonce){
-            nonce = new_nonce;
-            update_hash();
-        }
+        Block();
+        Block(T data);
+        void set_nonce(size_t new_nonce);
+        bool mine();
 
         template <typename T1>
         friend ostream& operator<<(ostream& os, const Block<T1>& block);
@@ -34,7 +30,41 @@ class Block
 };
 
 template <typename T>
-ostream& operator<<(ostream& os, const Block<T>& block){
+Block<T>::Block() : data{} 
+{
+    set_nonce(0);
+}
+
+template <typename T>
+Block<T>::Block(T data) : data(data) 
+{
+    set_nonce(0);
+}
+
+template <typename T>
+void Block<T>::set_nonce(size_t new_nonce)
+{
+    nonce = new_nonce;
+    update_hash();
+}
+
+template <typename T>
+bool Block<T>::mine()
+{
+    cout << "Mining block #" << id << " ...\n";
+    const size_t MAX = 1'000'000;
+    for (size_t nonce = 1; nonce < MAX; ++nonce) {
+        set_nonce(nonce);
+        if(is_valid){
+            return true;
+        }
+    }
+    return false;
+}
+
+template <typename T>
+ostream& operator<<(ostream& os, const Block<T>& block)
+{
     os << "id: " << block.id << "\n";
     os << "Nonce: " << block.nonce << "\n";
     os << "Transaction data:\n" << block.data;
@@ -44,13 +74,12 @@ ostream& operator<<(ostream& os, const Block<T>& block){
     return os;
 }
 
-
 template <typename T>
 void Block<T>::update_hash()
 {
     static Sha256<T,size_t> hasher{};
     hash = hasher(data, nonce);
-    is_valid = hash.starts_with("00");
+    is_valid = hash.starts_with("0");
 }
 
 # endif // BLOCK_H
