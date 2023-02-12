@@ -8,30 +8,30 @@ using namespace std;
 
 class Menu
 {
+    public:
+        static Menu* init(BlockChain<Transfer>& chain);
+        void display_main();
+
     private:
         inline static Menu* menu = nullptr;
         inline static BlockChain<Transfer>* chain;
 
         Menu() = default;
-        struct Capybara
-        {
+        struct Capybara {
             static void display();
         };
 
-    public:
-        static Menu* init(BlockChain<Transfer>* chain);
-        void display_main();
-
-    private:
         void display_create();
         void display_query();
+
+        void display_transfer();
 };
 
-Menu* Menu::init(BlockChain<Transfer>* cha)
+Menu* Menu::init(BlockChain<Transfer>& chaim)
 {
     if (menu == nullptr) {
         menu = new Menu();
-        chain = cha;
+        chain = &chaim;
     }
     return menu;
 }
@@ -42,10 +42,12 @@ void Menu::display_main()
     cout << "********** Welcome to CapyCoin **********\n";
     cout << "-----------------------------------------\n";
     Capybara::display();
-    cout << "1) Create transaction 💰\n";
-    cout << "2) Query data 📊\n";
-    cout << "3) Sign out ❌\n";
-    cout << "Enter option: ";
+    cout << "1) Create transaction. 💰\n";
+    // cout << "2) Update transaction. 🖊️\n";
+    // cout << "3) Remove transaction. 🧶\n";
+    cout << "2) Query data. 📊\n";
+    cout << "3) Sign out. ❌\n";
+    cout << "Enter an option: ";
     short option;
     cin >> option;
     cout << "\n";
@@ -73,16 +75,17 @@ void Menu::display_create()
     cout << "----------------------------------------\n";
     cout << "********** Create transaction ********** \n";
     cout << "----------------------------------------\n";
-    cout << "1) Make transfer 🟢\n";
-    cout << "2) Deposit 🟡\n";
-    cout << "3) Withdrawal 🟣\n";
-    cout << "4) Go back to main menu ⬅️\n";
-    cout << "Enter option: ";
+    cout << "1) Make transfer. 🟢\n";
+    cout << "2) Deposit. 🟡\n";
+    cout << "3) Withdrawal. 🟣\n";
+    cout << "4) Go back to main menu. ⬅️\n";
+    cout << "Enter an option: ";
     short option;
     cin >> option;
     switch (option)
     {
     case 1:
+        display_transfer();
         break;
     case 2:
         break;
@@ -94,6 +97,26 @@ void Menu::display_create()
     default:
         break;
     }
+}
+
+void Menu::display_transfer()
+{
+    string sender;
+    string receiver;
+    double amount;
+
+    cout << "Amount: ";
+    cin >> amount;
+    cout << "Sender: ";
+    cin >> sender;
+    cout << "Receiver: ";
+    cin >> receiver;
+    // Validar datos
+    chain->insert(Transfer(amount, sender, receiver));
+
+    cout << "The transfer was completed successfully. ✅\n";
+    cout << "\n";
+    display_create();
 }
 
 void Menu::display_query()
@@ -109,7 +132,7 @@ void Menu::display_query()
     cout << "6) Min value ...\n";
     cout << "7) Ledger ...\n";
     cout << "8) Go back to main menu ⬅️\n";
-    cout << "Enter option: ";
+    cout << "Enter an option: ";
     short option;
     cin >> option;
 
@@ -117,6 +140,7 @@ void Menu::display_query()
     {
     case 7:
         chain->display();
+        display_query();
         break;
     case 8:
         display_main();

@@ -1,8 +1,7 @@
 # include "blockchain.h"
 # include <fstream>
-# include <string>
 # include <sstream>
-# include <vector>
+# include "structures/circulararray.h"
  
 using namespace std;
 
@@ -13,7 +12,7 @@ struct DataManager
 
 void DataManager::load(string filename, BlockChain<Transfer>& chain)
 {
-    cout << "Loading data ...\n";
+    cout << "Loading data...\n";
     string line;
     ifstream file(filename);
 
@@ -21,7 +20,7 @@ void DataManager::load(string filename, BlockChain<Transfer>& chain)
     {
         istringstream iss(line);
 
-        vector<string> fields;
+        CircularArray<string, 3> fields;
         string field;
 
         while (getline(iss, field, ','))
@@ -37,5 +36,5 @@ void DataManager::load(string filename, BlockChain<Transfer>& chain)
     }
 
     file.close();
-    cout << "Data have been loaded successfully.\n";
+    cout << "Data have been loaded successfully. ✅\n";
 }

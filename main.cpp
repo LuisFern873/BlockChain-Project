@@ -8,7 +8,7 @@ int main()
 
     DataManager::load("assets/transfers.csv", chain);
 
-    auto menu = Menu::init(&chain);
+    auto menu = Menu::init(chain);
     menu->display_main();
 
     return 0;

@@ -11,7 +11,9 @@ class BlockChain
     public:
         BlockChain();
         void insert(T data);
-        void display(ostream& os = cout);
+        void update(size_t id);
+        void remove(size_t id);
+        void display();
 
     private:
         DoubleList<Block<T>*> chain;
@@ -37,14 +39,30 @@ void BlockChain<T>::insert(T data)
         chain.push_back(block);
     else
         throw runtime_error("Block not mined");
+    // update index
+    // Index::update();
 }
 
 template <typename T>
-void BlockChain<T>::display(ostream& os)
+void BlockChain<T>::update(size_t id)
+{
+    // re hashing
+    // from id to last block
+    // update ledger and index
+}
+
+template <typename T>
+void BlockChain<T>::remove(size_t id)
+{
+    // Just remove from index
+}
+
+template <typename T>
+void BlockChain<T>::display()
 {
     auto iterator = chain.begin();
     while(iterator != chain.end()){
-        os << **iterator << "\n";
+        cout << **iterator << "\n";
         ++iterator;
     }
 }
