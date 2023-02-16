@@ -17,6 +17,7 @@ class BlockChain
 
     private:
         DoubleList<Block<T>*> chain;
+
         void create_genesis();
 
     friend class Index;

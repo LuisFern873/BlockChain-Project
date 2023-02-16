@@ -10,11 +10,17 @@ class CircularArray
 {  
     public:
         CircularArray();
+        CircularArray(const CircularArray& other);
+        CircularArray<T, N>& operator=(const CircularArray& other);
+
         ~CircularArray();
         void push_front(T data);
         void push_back(T data);
         T pop_front();
         T pop_back();
+        void insert(T data, int index);
+        T remove(int index);
+
         bool is_full();
         bool is_empty();
         int size();
@@ -37,6 +43,34 @@ CircularArray<T, N>::CircularArray()
     array = new T[N];
     front = back = -1;
 }
+
+template <typename T, size_t N>
+CircularArray<T, N>::CircularArray(const CircularArray& other)
+{
+    array = new T[N];
+    back = other.back;
+    front = other.front;
+
+    for (int i = 0; i < N; i++)
+        array[i] = other.array[i];
+}
+
+template <typename T, size_t N>
+CircularArray<T, N>& CircularArray<T, N>::operator=(const CircularArray& other)
+{
+    delete[] array;
+
+    array = new T[N];
+    back = other.back;
+    front = other.front;
+
+    for (int i = 0; i < N; i++) {
+        array[i] = other.array[i];
+    }
+
+    return *this;
+}
+
 
 template <typename T, size_t N>
 CircularArray<T, N>::~CircularArray()
@@ -84,6 +118,7 @@ void CircularArray<T, N>::push_front(T data)
     array[front] = data;
 }
 
+
 template <typename T, size_t N>
 T CircularArray<T, N>::pop_back()
 {
@@ -117,6 +152,61 @@ T CircularArray<T, N>::pop_front()
 }
 
 template <typename T, size_t N>
+void CircularArray<T, N>::insert(T data, int index)
+{
+    if (index < 0 or index > size())
+        throw out_of_range("Circular array index out of range");
+
+    if (is_full())
+        throw runtime_error("Circular array is full");
+
+    if (index == 0) {
+        push_front(data);
+        return;
+    }
+    else if (index == size()) {
+        push_back(data);
+        return;
+    }
+
+    int pos = (front + index) % N;
+    
+    for (int i = next(size() - 1); i >= index; i = prev(i)) {
+        array[next(i)] = array[i];
+    }
+
+    array[pos] = data;
+    back = next(back);
+}
+
+template <typename T, size_t N>
+T CircularArray<T, N>::remove(int index)
+{
+    if (index < 0 || index >= size())
+        throw out_of_range("Circular array index out of range");
+
+    T value = array[(front + index) % N];
+
+    if (index == 0)
+        pop_front();
+    else if (index == size() - 1)
+        pop_back();
+    else {
+        int i = index;
+        while (i != 0) {
+            T temp = array[(front + i - 1) % N];
+            array[(front + i - 1) % N] = array[(front + i) % N];
+            array[(front + i) % N] = temp;
+            i = prev(i);
+        }
+        pop_front();
+    }
+
+    return value;
+}
+
+
+template <typename T, size_t N>
 int CircularArray<T, N>::size()
 {
     int distance = back - front + 1;
@@ -142,7 +232,7 @@ ostream& operator<<(ostream& os, CircularArray<T, N>& arr)
 {
     int current = arr.front;
     while(current != arr.back){
-        os << arr.array[current] << " ";
+        os << arr.array[current] << "\n";
         current = arr.next(current);
     }
     os << arr.array[arr.back];

@@ -2,83 +2,101 @@
 # define BLOCK_H
 
 # include <iostream>
+# include "structures/circulararray.h"
 # include "sha256.h"
 
 using namespace std;
 
-template <typename T>
+template <typename T, size_t N>
 class Block
 {
     public:
         size_t id;
         size_t nonce;
-        T data; // Transaction data
+        CircularArray<T, N> features; 
         string hash;
         string previous_hash;
         bool is_valid;
 
         Block();
-        Block(T data);
+        void insert(T data);
+        T remove(size_t index);
+
         void set_nonce(size_t new_nonce);
         bool mine();
 
-        template <typename T1>
-        friend ostream& operator<<(ostream& os, const Block<T1>& block);
+        template <typename T1, size_t N1>
+        friend ostream& operator<<(ostream& os, const Block<T1,N1>& block);
 
     private:
         void update_hash();
 };
 
-template <typename T>
-Block<T>::Block() : data{} 
+template <typename T, size_t N>
+Block<T, N>::Block()
 {
-    set_nonce(0);
+
 }
 
-template <typename T>
-Block<T>::Block(T data) : data(data) 
+template <typename T, size_t N>
+void Block<T, N>::insert(T data)
 {
-    set_nonce(0);
+    features.push_back(data);
+
+    if (features.is_full())
+        set_nonce(0);
 }
 
-template <typename T>
-void Block<T>::set_nonce(size_t new_nonce)
+template <typename T, size_t N>
+T Block<T, N>::remove(size_t index)
+{
+    return features.remove(index);
+}
+
+
+template <typename T, size_t N>
+void Block<T, N>::set_nonce(size_t new_nonce)
 {
     nonce = new_nonce;
     update_hash();
 }
 
-template <typename T>
-bool Block<T>::mine()
+template <typename T, size_t N>
+bool Block<T, N>::mine()
 {
-    // cout << "Mining block #" << id << " ...\n";
-    const size_t MAX = 1'000'000;
-    for (size_t nonce = 1; nonce < MAX; ++nonce) {
+    size_t nonce = 1;
+    const size_t MAX_NONCE = 1'000'000;
+
+    while (nonce < MAX_NONCE) {
         set_nonce(nonce);
         if(is_valid){
             return true;
         }
+        ++nonce;
     }
     return false;
 }
 
-template <typename T>
-ostream& operator<<(ostream& os, const Block<T>& block)
+template <typename T, size_t N>
+ostream& operator<<(ostream& os, Block<T,N>& block)
 {
     os << "id: " << block.id << "\n";
     os << "Nonce: " << block.nonce << "\n";
-    os << "Transaction data:\n" << block.data;
+    os << "Transaction data:\n";
+    os << "\n";
+    for (size_t i = 0; i < block.features.size(); ++i)
+        cout << block.features[i] << "\n";
     os << "Hash: " << block.hash << "\n";
     os << "Previous hash: " << block.previous_hash << "\n";
     os << "Valid: " << boolalpha << block.is_valid << "\n";
     return os;
 }
 
-template <typename T>
-void Block<T>::update_hash()
+template <typename T, size_t N>
+void Block<T, N>::update_hash()
 {
-    static Sha256<T,size_t> hasher{};
-    hash = hasher(data, nonce);
+    static Sha256<CircularArray<T, N>, size_t> hasher{};
+    hash = hasher(features, nonce);
     is_valid = hash.starts_with("0");
 }
 

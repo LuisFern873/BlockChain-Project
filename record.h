@@ -5,6 +5,13 @@
 
 using namespace std;
 
+class BankAccount
+{
+    private:
+        double balance;
+        string user;
+};
+
 class Record
 {
     public:
@@ -79,6 +86,55 @@ ostream& operator<<(ostream& os, const Record& record)
     record.print(os);
     return os;
 }
+
+// class Transfer
+// {
+//     public:
+//         Transfer();
+//         Transfer(double amount, string sender, string receiver);
+//         friend ostream& operator<<(ostream& os, const Transfer& transfer);
+
+//         // For indexing
+//         string get_sender(){ 
+//             return sender;
+//         }
+//         string get_receiver(){
+//             return receiver;
+//         }
+
+//     private:
+//         double amount; // CapyCoins! :)
+//         time_t time_stamp;
+//         string sender;
+//         string receiver;
+
+// };
+
+
+// Transfer::Transfer()
+// {
+//     this->time_stamp = time(nullptr);
+//     this->amount = 0.0;
+//     this->sender = "";
+//     this->receiver = "";
+// }
+
+// Transfer::Transfer(double amount, string sender, string receiver)
+// {
+//     this->time_stamp = time(nullptr);
+//     this->amount = amount;
+//     this->sender = sender;
+//     this->receiver = receiver;
+// }
+
+// ostream& operator<<(ostream& os, const Transfer& transfer)
+// {
+//     os << "\tDate: " << ctime(&transfer.time_stamp);
+//     os << "\tAmount: " << transfer.amount << " CapyCoins\n";
+//     os << "\tSender: " << transfer.sender << "\n";
+//     os << "\tReceiver: " << transfer.receiver << "\n";
+//     return os;
+// }
 
 
 # endif // RECORD_H
