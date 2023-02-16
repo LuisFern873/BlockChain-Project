@@ -59,7 +59,7 @@ void Record::print(ostream& os) const
 
 // Transfer implementation
 
-Transfer::Transfer()
+Transfer::Transfer() : Record()
 {
     this->amount = 0.0;
     this->sender = "";
@@ -86,6 +86,7 @@ ostream& operator<<(ostream& os, const Record& record)
     record.print(os);
     return os;
 }
+
 
 // class Transfer
 // {

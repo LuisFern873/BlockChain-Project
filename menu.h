@@ -115,6 +115,8 @@ void Menu::display_transfer()
     chain->insert(Transfer(amount, sender, receiver));
 
     cout << "The transfer was completed successfully. ✅\n";
+    cout << "Waiting to complete block...\n";
+    cout << *chain->block << "\n";
     cout << "\n";
     display_create();
 }

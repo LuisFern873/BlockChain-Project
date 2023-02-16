@@ -5,7 +5,7 @@
 # include "record.h"
 # include "structures/doublelist.h"
 
-template <typename T>
+template <typename T, size_t N = 5>
 class BlockChain
 {
     public:
@@ -15,58 +15,61 @@ class BlockChain
         void remove(size_t id);
         void display();
 
+        Block<T, N>* block;
+
     private:
-        DoubleList<Block<T, 4>*> chain;
+        DoubleList<Block<T, N>*> chain;
 
         void create_genesis();
 
     friend class Index;
 };
 
-template <typename T>
-BlockChain<T>::BlockChain()
+template <typename T, size_t N>
+BlockChain<T, N>::BlockChain()
 {
     create_genesis();
+    block = new Block<T, N>();
 }
 
-template <typename T>
-void BlockChain<T>::insert(T feature)
+template <typename T, size_t N>
+void BlockChain<T, N>::insert(T feature)
 {
-    auto block = new Block<T>();
-
     block->insert(feature);
 
-    if (!block.data.is_full())
+    if (!block->data.is_full())
         return;
-
+    
     block->id = chain.size();
     block->previous_hash = chain.back()->hash;
 
-    if (block->mine())
+    if (block->mine()) {
         chain.push_back(block);
+        block = new Block<T, N>();
+    }
     else
         throw runtime_error("Block not mined");
-        
+
     // update index
     // Index::update();
 }
 
-template <typename T>
-void BlockChain<T>::update(size_t id)
+template <typename T, size_t N>
+void BlockChain<T, N>::update(size_t id)
 {
     // re hashing
     // from id to last block
     // update ledger and index
 }
 
-template <typename T>
-void BlockChain<T>::remove(size_t id)
+template <typename T, size_t N>
+void BlockChain<T, N>::remove(size_t id)
 {
     // Just remove from index
 }
 
-template <typename T>
-void BlockChain<T>::display()
+template <typename T, size_t N>
+void BlockChain<T, N>::display()
 {
     auto iterator = chain.begin();
     while(iterator != chain.end()){
@@ -75,17 +78,19 @@ void BlockChain<T>::display()
     }
 }
 
-template <typename T>
-void BlockChain<T>::create_genesis()
+template <typename T, size_t N>
+void BlockChain<T, N>::create_genesis()
 {
-    auto genesis = new Block<T>();
-    genesis->id = 0;
-    genesis->previous_hash = string(64, '0');
+    auto genesis = new Block<T, N>();
 
-    if (genesis->mine())
+    while (!genesis->data.is_full())
+        genesis->insert(T());
+
+    if (genesis->mine()) {
         chain.push_front(genesis);
+    }
     else
-        throw runtime_error("Block not mined");
+        throw runtime_error("Block not mined");  
 }
 
 

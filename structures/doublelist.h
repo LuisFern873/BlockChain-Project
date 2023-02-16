@@ -124,8 +124,15 @@ DoubleList<T>::DoubleList()
 template <typename T>
 DoubleList<T>::~DoubleList()
 {
-    delete head;
-    delete tail;
+    Node<T>* current = head;
+    while (current != nullptr) {
+        Node<T>* next = current->next;
+        delete current;
+        current = next;
+    }
+    head = nullptr;
+    tail = nullptr;
+    nodes = 0;
 }
 
 template <typename T>
