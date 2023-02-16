@@ -182,28 +182,24 @@ void CircularArray<T, N>::insert(T data, int index)
 template <typename T, size_t N>
 T CircularArray<T, N>::remove(int index)
 {
-    if (index < 0 || index >= size())
+    if (index < 0 or index >= size())
         throw out_of_range("Circular array index out of range");
 
-    T value = array[(front + index) % N];
+    T value = (*this)[index];
 
     if (index == 0)
         pop_front();
     else if (index == size() - 1)
         pop_back();
     else {
-        int i = index;
-        while (i != 0) {
-            T temp = array[(front + i - 1) % N];
-            array[(front + i - 1) % N] = array[(front + i) % N];
-            array[(front + i) % N] = temp;
-            i = prev(i);
-        }
-        pop_front();
+        for (int i = index; i < size() - 1; ++i)
+            (*this)[i] = (*this)[i + 1];
+        pop_back();
     }
 
     return value;
 }
+
 
 
 template <typename T, size_t N>

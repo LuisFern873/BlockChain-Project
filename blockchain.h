@@ -10,13 +10,13 @@ class BlockChain
 {
     public:
         BlockChain();
-        void insert(T data);
+        void insert(T feature);
         void update(size_t id);
         void remove(size_t id);
         void display();
 
     private:
-        DoubleList<Block<T>*> chain;
+        DoubleList<Block<T, 4>*> chain;
 
         void create_genesis();
 
@@ -30,9 +30,15 @@ BlockChain<T>::BlockChain()
 }
 
 template <typename T>
-void BlockChain<T>::insert(T data)
+void BlockChain<T>::insert(T feature)
 {
-    auto block = new Block<T>(data);
+    auto block = new Block<T>();
+
+    block->insert(feature);
+
+    if (!block.data.is_full())
+        return;
+
     block->id = chain.size();
     block->previous_hash = chain.back()->hash;
 
@@ -40,6 +46,7 @@ void BlockChain<T>::insert(T data)
         chain.push_back(block);
     else
         throw runtime_error("Block not mined");
+        
     // update index
     // Index::update();
 }
