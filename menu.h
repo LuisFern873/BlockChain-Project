@@ -3,18 +3,20 @@
 
 # include <iostream>
 # include "blockchain.h"
+# include "index.h"
 
 using namespace std;
 
 class Menu
 {
     public:
-        static Menu* init(BlockChain<Transfer>& chain);
+        static Menu* init(BlockChain<Transfer>& chain, Index& index);
         void display_main();
 
     private:
         inline static Menu* menu = nullptr;
         inline static BlockChain<Transfer>* chain;
+        inline static Index* index;
 
         Menu() = default;
         struct Capybara {
@@ -25,13 +27,16 @@ class Menu
         void display_query();
 
         void display_transfer();
+
+        void display_equal_to();
 };
 
-Menu* Menu::init(BlockChain<Transfer>& chaim)
+Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
 {
     if (menu == nullptr) {
         menu = new Menu();
-        chain = &chaim;
+        chain = &Chain;
+        index = &Index;
     }
     return menu;
 }
@@ -126,13 +131,13 @@ void Menu::display_query()
     cout << "--------------------------------\n";
     cout << "********** Query data **********\n";
     cout << "--------------------------------\n";
-    cout << "1) Equal to ...\n";
-    cout << "2) Range search ...\n";
-    cout << "3) Start with ...\n";
-    cout << "4) Contains ...\n";
-    cout << "5) Max value ...\n";
-    cout << "6) Min value ...\n";
-    cout << "7) Ledger ...\n";
+    cout << "1) Equal to [...]\n";
+    cout << "2) Range search [...]\n";
+    cout << "3) Start with [...]\n";
+    cout << "4) Contains [...]\n";
+    cout << "5) Max value [...]\n";
+    cout << "6) Min value [...]\n";
+    cout << "7) Ledger [...]\n";
     cout << "8) Go back to main menu ⬅️\n";
     cout << "Enter an option: ";
     short option;
@@ -140,6 +145,19 @@ void Menu::display_query()
 
     switch (option)
     {
+    case 1:
+        display_equal_to();
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    case 4:
+        break;
+    case 5:
+        break;
+    case 6:
+        break;
     case 7:
         chain->display();
         display_query();
@@ -148,8 +166,30 @@ void Menu::display_query()
         display_main();
         break;
     default:
+        cout << "Enter a valid option!\n";
+        display_query();
         break;
     }
+}
+
+void Menu::display_equal_to()
+{
+    string name;
+    Member member;
+    short option;
+
+    cout << "1) Sender\n";
+    cout << "2) Receiver\n";
+    cout << "Member: ";
+    cin >> option;
+    member = option == 1 ? Member::sender : Member::receiver;
+
+    cout << "Name: ";
+    cin >> name;
+
+    cout << index->EqualTo(member, name) << "\n";
+
+    display_query();
 }
 
 void Menu::Capybara::display()

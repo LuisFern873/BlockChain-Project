@@ -15,6 +15,9 @@ class BlockChain
         void remove(size_t id);
         void display();
 
+
+        int size();
+
         Block<T, N>* block;
 
     private:
@@ -91,6 +94,12 @@ void BlockChain<T, N>::create_genesis()
     }
     else
         throw runtime_error("Block not mined");  
+}
+
+template <typename T, size_t N>
+int BlockChain<T, N>::size()
+{
+    return chain.size();
 }
 
 

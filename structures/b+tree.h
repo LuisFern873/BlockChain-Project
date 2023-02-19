@@ -2,59 +2,41 @@
 # define B_PLUS_TREE_H
 
 # include <iostream>
+# include <vector>
 
 using namespace std;
 
-// Searching on a B+ tree in C++
-
-#include <climits>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-using namespace std;
-
-int MAX = 3;
-
-
-
+int MAX = 5;
 
 template <typename TK, typename TV>
 struct Node
 {
     TK* key;
-    TV** data;
+    TV* value;
 
-    Node** ptr;
-    int size;
-    bool IS_LEAF;
-
-    void display();
+    Node** children;
+    int count;
+    bool leaf;
+    
     Node();
     ~Node();
 };
 
-
 template <typename TK, typename TV>
 Node<TK,TV>::Node()
 {
-    size = 0;
+    count = 0;
     key = new TK[MAX];
-    data = new TV*[MAX];
-    ptr = new Node*[MAX + 1];
+    value = new TV[MAX];
+    children = new Node*[MAX + 1];
 }
 
 template <typename TK, typename TV>
 Node<TK,TV>::~Node()
 {
     delete[] key;
-    delete[] data;
-    delete[] ptr;
-}
-
-template <typename TK, typename TV>
-void display()
-{
-
+    delete[] value;
+    delete[] children;
 }
 
 
@@ -63,17 +45,20 @@ class BPlusTree
 {
     public:
         BPlusTree();
-        void search(TK);
-        void insert(TK, TV);
-        void remove(TK);
-        void displayPretty();
-        size_t height();
+        TV search(TK key);
+        vector<TV> rangeSearch(TK start, TK end);
+        TV min();
+        TV max();
 
-        void iterateLeafNodes();
+        void insert(TK key, TV value);
+        void remove(TK key);
+        void displayPretty();
+        int height();
 
     private:
         using Node = Node<TK,TV>;
         Node* root;
+        void rangeSearch(Node* node, TK start, TK end, vector<TV>& report);
         void insertInternal(TK, TV, Node*, Node*);
         Node* findParent(Node*, Node*);
         void displayGivenLevel(Node* node, int level);
@@ -87,17 +72,17 @@ BPlusTree<TK,TV>::BPlusTree()
 }
 
 template <typename TK, typename TV>
-size_t BPlusTree<TK,TV>::height()
+int BPlusTree<TK,TV>::height()
 {
     if (root == nullptr)
         return 0;
 
     Node* current = root;
-    size_t height = 1;
+    int height = 1;
 
-    while (current->IS_LEAF == false) {
+    while (current->leaf == false) {
         ++height;
-        current = current->ptr[0];
+        current = current->children[0];
     }
 
     return height;
@@ -119,72 +104,108 @@ void BPlusTree<TK,TV>::displayGivenLevel(Node* node, int level)
         return;
     if (level == 1) {
 		cout << "[ ";
-		for (int i = 0; i < node->size; ++i) {
+		for (int i = 0; i < node->count; ++i) {
 			cout << node->key[i] << " ";
 		}
 		cout << "]";
 	}
     else {
-		for (int i = 0; i <= node->size; ++i) {
-			displayGivenLevel(node->ptr[i], level - 1);
+		for (int i = 0; i <= node->count; ++i) {
+			displayGivenLevel(node->children[i], level - 1);
 			cout << " ";
 		}
     }
 }
 
 template <typename TK, typename TV>
-void BPlusTree<TK,TV>::search(TK x)
-{
-    if (root == nullptr) {
-        cout << "Tree is empty\n";
-    } 
-    else {
-        Node* cursor = root;
-        while (cursor->IS_LEAF == false) {
-            for (int i = 0; i < cursor->size; i++) {
-                if (x < cursor->key[i]) {
-                    cursor = cursor->ptr[i];
-                    break;
-                }
-                if (i == cursor->size - 1) {
-                    cursor = cursor->ptr[i + 1];
-                    break;
-                }
-            }
-        }
-        for (int i = 0; i < cursor->size; i++) {
-            if (cursor->key[i] == x) {
-                cout << "Found\n";
-                cout << *cursor->data[i] << "\n"; // Show content of data pointer
-                return;
-            }
-        }
-        cout << "Not found\n";
-    }
+vector<TV> BPlusTree<TK,TV>::rangeSearch(TK start, TK end){
+    vector<TV> report; 
+	rangeSearch(root, start, end, report);
+    return report;
 }
 
 template <typename TK, typename TV>
-void BPlusTree<TK,TV>::iterateLeafNodes() 
-{
-    if (root == nullptr) {
-        cout << "The tree is empty." << endl;
+void BPlusTree<TK,TV>::rangeSearch(Node* node, TK start, TK end, vector<TV>& report){
+
+    if (node == nullptr)
         return;
-    }
 
-    Node* cursor = root;
-    while (cursor->IS_LEAF == false) {
-        cursor = cursor->ptr[0];
-    }
+    int i = 0;
+    while (i < node->count and node->key[i] < start)
+		++i;
 
-    while (cursor != nullptr) {
-        cout << "cursor->size:" << cursor->size << "\n";
-        for (int i = 0; i < cursor->size; i++) {
-            cout << *cursor->data[i] << "\n";
-        }
-        cursor = cursor->ptr[cursor->size];
+    while (i < node->count and node->key[i] <= end) {
+		if (!node->leaf)
+        	rangeSearch(node->children[i], start, end, report);
+        else
+            report.push_back(node->value[i]);
+        ++i;
     }
+		
+	if (!node->leaf)
+        rangeSearch(node->children[i], start, end, report);
 }
 
+template <typename TK, typename TV>
+TV BPlusTree<TK,TV>::min()
+{
+	if (root == nullptr)
+		throw runtime_error("B+ tree is empty");
+
+	Node* current = root;
+
+	while (current->leaf == false)
+	{
+		current = current->children[0];
+	}
+
+	return current->value[0];
+}
+
+template <typename TK, typename TV>
+TV BPlusTree<TK,TV>::max()
+{
+	if (root == nullptr)
+		throw runtime_error("B+ tree is empty");
+
+	Node* current = root;
+
+	while (current->leaf == false)
+	{
+		current = current->children[current->count];
+	}
+
+	return current->value[current->count - 1];
+}
+
+template <typename TK, typename TV>
+TV BPlusTree<TK,TV>::search(TK x)
+{
+    if (root == nullptr)
+        throw runtime_error("B+ tree is empty");
+    
+    Node* cursor = root;
+    while (cursor->leaf == false) {
+        for (int i = 0; i < cursor->count; i++) {
+            if (x < cursor->key[i]) {
+                cursor = cursor->children[i];
+                break;
+            }
+            if (i == cursor->count - 1) {
+                cursor = cursor->children[i + 1];
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < cursor->count; i++) {
+        if (cursor->key[i] == x) {
+            cout << "Found\n";
+            return cursor->value[i];
+        }
+    }
+    cout << "Not found\n";
+    return TV();
+}
 
 
 template <typename TK, typename TV>
@@ -193,54 +214,54 @@ void BPlusTree<TK,TV>::insert(TK x, TV y)
     if (root == nullptr) {
         root = new Node;
         root->key[0] = x;
-        root->data[0] = &y; // Assign pointer to data
-        root->IS_LEAF = true;
-        root->size = 1;
+        root->value[0] = y; // Assign pointer to value
+        root->leaf = true;
+        root->count = 1;
     }
     else {
         Node* cursor = root;
         Node* parent;
 
-        while (cursor->IS_LEAF == false)
+        while (cursor->leaf == false)
         {
             parent = cursor;
-            for (int i = 0; i < cursor->size; i++) {
+            for (int i = 0; i < cursor->count; i++) {
                 if (x < cursor->key[i]) {
-                    cursor = cursor->ptr[i];
+                    cursor = cursor->children[i];
                     break;
                 }
-                if (i == cursor->size - 1) {
-                    cursor = cursor->ptr[i + 1];
+                if (i == cursor->count - 1) {
+                    cursor = cursor->children[i + 1];
                     break;
                 }
             }
         }
 
-        if (cursor->size < MAX) {
+        if (cursor->count < MAX) {
             int i = 0;
-            while (x > cursor->key[i] && i < cursor->size) {
+            while (x > cursor->key[i] && i < cursor->count) {
                 i++;
             }
 
-            for (int j = cursor->size; j > i; j--) {
+            for (int j = cursor->count; j > i; j--) {
                 cursor->key[j] = cursor->key[j - 1];
-                cursor->data[j] = cursor->data[j - 1]; // Along with keys, shift data pointers
+                cursor->value[j] = cursor->value[j - 1]; // Along with keys, shift value pointers
             }
             cursor->key[i] = x;
-            cursor->data[i] = &y; // Assign pointer to data
+            cursor->value[i] = y; // Assign pointer to value
 
-            cursor->size++;
-            cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
-            cursor->ptr[cursor->size - 1] = nullptr;
+            cursor->count++;
+            cursor->children[cursor->count] = cursor->children[cursor->count - 1];
+            cursor->children[cursor->count - 1] = nullptr;
         }
         else {
             Node* newLeaf = new Node;
             TK virtualNode[MAX + 1];
-            TV* virtualData[MAX + 1];
+            TV virtualvalue[MAX + 1];
 
             for (int i = 0; i < MAX; i++) {
                 virtualNode[i] = cursor->key[i];
-                virtualData[i] = cursor->data[i];
+                virtualvalue[i] = cursor->value[i];
             }
 
             int i = 0, j;
@@ -250,41 +271,41 @@ void BPlusTree<TK,TV>::insert(TK x, TV y)
 
             for (int j = MAX; j > i; j--) {
                 virtualNode[j] = virtualNode[j - 1];
-                virtualData[j] = virtualData[j - 1];
+                virtualvalue[j] = virtualvalue[j - 1];
             }
 
             virtualNode[i] = x;
-            virtualData[i] = &y;
+            virtualvalue[i] = y;
 
-            newLeaf->IS_LEAF = true;
-            cursor->size = (MAX + 1) / 2;
-            newLeaf->size = MAX + 1 - (MAX + 1) / 2;
-            cursor->ptr[cursor->size] = newLeaf;
-            newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
-            cursor->ptr[MAX] = nullptr;
+            newLeaf->leaf = true;
+            cursor->count = (MAX + 1) / 2;
+            newLeaf->count = MAX + 1 - (MAX + 1) / 2;
+            cursor->children[cursor->count] = newLeaf;
+            newLeaf->children[newLeaf->count] = cursor->children[MAX];
+            cursor->children[MAX] = nullptr;
 
-            for (i = 0; i < cursor->size; i++) {
+            for (i = 0; i < cursor->count; i++) {
                 cursor->key[i] = virtualNode[i];
-                cursor->data[i] = virtualData[i];
+                cursor->value[i] = virtualvalue[i];
             }
-            for (i = 0, j = cursor->size; i < newLeaf->size; i++, j++) {
+            for (i = 0, j = cursor->count; i < newLeaf->count; i++, j++) {
                 newLeaf->key[i] = virtualNode[j];
-                newLeaf->data[i] = virtualData[j];
+                newLeaf->value[i] = virtualvalue[j];
             }
 
             if (cursor == root) {
                 Node* newRoot = new Node;
                 newRoot->key[0] = newLeaf->key[0];
-                newRoot->data[0] = newLeaf->data[0];
+                newRoot->value[0] = newLeaf->value[0];
 
-                newRoot->ptr[0] = cursor;
-                newRoot->ptr[1] = newLeaf;
-                newRoot->IS_LEAF = false;
-                newRoot->size = 1;
+                newRoot->children[0] = cursor;
+                newRoot->children[1] = newLeaf;
+                newRoot->leaf = false;
+                newRoot->count = 1;
                 root = newRoot;
             }
             else {
-                insertInternal(newLeaf->key[0], *newLeaf->data[0], parent, newLeaf);
+                insertInternal(newLeaf->key[0], newLeaf->value[0], parent, newLeaf);
             }
         }
     }
@@ -293,35 +314,35 @@ void BPlusTree<TK,TV>::insert(TK x, TV y)
 template <typename TK, typename TV>
 void BPlusTree<TK,TV>::insertInternal(TK x, TV y, Node* cursor, Node* child)
 {
-    if (cursor->size < MAX) {
+    if (cursor->count < MAX) {
         int i = 0;
-        while (x > cursor->key[i] && i < cursor->size)
+        while (x > cursor->key[i] && i < cursor->count)
             i++;
-        for (int j = cursor->size; j > i; j--) {
+        for (int j = cursor->count; j > i; j--) {
             cursor->key[j] = cursor->key[j - 1];
-            cursor->data[j] = cursor->data[j - 1];
+            cursor->value[j] = cursor->value[j - 1];
         }
-        for (int j = cursor->size + 1; j > i + 1; j--) {
-            cursor->ptr[j] = cursor->ptr[j - 1];
+        for (int j = cursor->count + 1; j > i + 1; j--) {
+            cursor->children[j] = cursor->children[j - 1];
         }
         cursor->key[i] = x;
-        cursor->data[i] = &y;
+        cursor->value[i] = y;
 
-        cursor->size++;
-        cursor->ptr[i + 1] = child;
+        cursor->count++;
+        cursor->children[i + 1] = child;
     } 
     else {
         Node* newInternal = new Node;
         TK virtualKey[MAX + 1];
-        TV* virtualData[MAX + 1]; // MOD!!!!
-        Node* virtualPtr[MAX + 2];
+        TV virtualvalue[MAX + 1]; // MOD!!!!
+        Node* virtualchildren[MAX + 2];
 
         for (int i = 0; i < MAX; i++) {
             virtualKey[i] = cursor->key[i];
-            virtualData[i] = cursor->data[i];
+            virtualvalue[i] = cursor->value[i];
         }
         for (int i = 0; i < MAX + 1; i++) {
-            virtualPtr[i] = cursor->ptr[i];
+            virtualchildren[i] = cursor->children[i];
         }
 
         int i = 0, j;
@@ -330,38 +351,38 @@ void BPlusTree<TK,TV>::insertInternal(TK x, TV y, Node* cursor, Node* child)
             
         for (int j = MAX; j > i; j--) {
             virtualKey[j] = virtualKey[j - 1];
-            virtualData[j] = virtualData[j - 1];
+            virtualvalue[j] = virtualvalue[j - 1];
         }
 
         virtualKey[i] = x;
-        virtualData[i] = &y;
+        virtualvalue[i] = y;
 
         for (int j = MAX + 1; j > i + 1; j--) {
-            virtualPtr[j] = virtualPtr[j - 1];
+            virtualchildren[j] = virtualchildren[j - 1];
         }
-        virtualPtr[i + 1] = child;
-        newInternal->IS_LEAF = false;
-        cursor->size = (MAX + 1) / 2;
-        newInternal->size = MAX - (MAX + 1) / 2;
-        for (i = 0, j = cursor->size + 1; i < newInternal->size; i++, j++) {
+        virtualchildren[i + 1] = child;
+        newInternal->leaf = false;
+        cursor->count = (MAX + 1) / 2;
+        newInternal->count = MAX - (MAX + 1) / 2;
+        for (i = 0, j = cursor->count + 1; i < newInternal->count; i++, j++) {
             newInternal->key[i] = virtualKey[j];
-            newInternal->data[i] = virtualData[j];
+            newInternal->value[i] = virtualvalue[j];
         }
-        for (i = 0, j = cursor->size + 1; i < newInternal->size + 1; i++, j++) {
-            newInternal->ptr[i] = virtualPtr[j];
+        for (i = 0, j = cursor->count + 1; i < newInternal->count + 1; i++, j++) {
+            newInternal->children[i] = virtualchildren[j];
         }
         if (cursor == root) {
             Node* newRoot = new Node;
-            newRoot->key[0] = cursor->key[cursor->size];
-            newRoot->data[0] = cursor->data[cursor->size];
+            newRoot->key[0] = cursor->key[cursor->count];
+            newRoot->value[0] = cursor->value[cursor->count];
 
-            newRoot->ptr[0] = cursor;
-            newRoot->ptr[1] = newInternal;
-            newRoot->IS_LEAF = false;
-            newRoot->size = 1;
+            newRoot->children[0] = cursor;
+            newRoot->children[1] = newInternal;
+            newRoot->leaf = false;
+            newRoot->count = 1;
             root = newRoot;
         } else {
-            insertInternal(cursor->key[cursor->size], *cursor->data[cursor->size], findParent(root, cursor), newInternal);
+            insertInternal(cursor->key[cursor->count], cursor->value[cursor->count], findParent(root, cursor), newInternal);
         }
   }
 }
@@ -372,16 +393,16 @@ Node<TK,TV>* BPlusTree<TK,TV>::findParent(Node* cursor, Node* child)
 {
     Node* parent;
     
-    if (cursor->IS_LEAF || (cursor->ptr[0])->IS_LEAF)
+    if (cursor->leaf || (cursor->children[0])->leaf)
         return nullptr;
 
-    for (int i = 0; i < cursor->size + 1; i++) {
-        if (cursor->ptr[i] == child) {
+    for (int i = 0; i < cursor->count + 1; i++) {
+        if (cursor->children[i] == child) {
             parent = cursor;
             return parent;
         } 
         else {
-            parent = findParent(cursor->ptr[i], child);
+            parent = findParent(cursor->children[i], child);
             if (parent != nullptr)
                 return parent;
         }
@@ -402,19 +423,19 @@ void BPlusTree<TK,TV>::remove(TK x) {
         Node* parent;
         int leftSibling, rightSibling;
 
-        while (cursor->IS_LEAF == false) {
-            for (int i = 0; i < cursor->size; i++) {
+        while (cursor->leaf == false) {
+            for (int i = 0; i < cursor->count; i++) {
                 parent = cursor;
                 leftSibling = i - 1;
                 rightSibling = i + 1;
                 if (x < cursor->key[i]) {
-                    cursor = cursor->ptr[i];
+                    cursor = cursor->children[i];
                     break;
                 }
-                if (i == cursor->size - 1) {
+                if (i == cursor->count - 1) {
                     leftSibling = i;
                     rightSibling = i + 2;
-                    cursor = cursor->ptr[i + 1];
+                    cursor = cursor->children[i + 1];
                     break;
                 }
             }
@@ -423,7 +444,7 @@ void BPlusTree<TK,TV>::remove(TK x) {
         bool found = false;
         int pos;
 
-        for (pos = 0; pos < cursor->size; pos++) {
+        for (pos = 0; pos < cursor->count; pos++) {
             if (cursor->key[pos] == x) {
                 found = true;
                 break;
@@ -435,17 +456,17 @@ void BPlusTree<TK,TV>::remove(TK x) {
             return;
         }
 
-        for (int i = pos; i < cursor->size; i++) {
+        for (int i = pos; i < cursor->count; i++) {
             cursor->key[i] = cursor->key[i + 1];
-            cursor->data[i] = cursor->data[i + 1]; // MOD!!!
+            cursor->value[i] = cursor->value[i + 1]; // MOD!!!
         }
-        cursor->size--;
+        cursor->count--;
 
         if (cursor == root) {
             for (int i = 0; i < MAX + 1; i++) {
-                cursor->ptr[i] = nullptr;
+                cursor->children[i] = nullptr;
             }
-            if (cursor->size == 0) {
+            if (cursor->count == 0) {
                 cout << "Tree died\n";
                 delete cursor;
                 root = nullptr;
@@ -453,77 +474,77 @@ void BPlusTree<TK,TV>::remove(TK x) {
             return;
         }
 
-        cursor->ptr[cursor->size] = cursor->ptr[cursor->size + 1];
-        cursor->ptr[cursor->size + 1] = nullptr;
-        if (cursor->size >= (MAX + 1) / 2) {
+        cursor->children[cursor->count] = cursor->children[cursor->count + 1];
+        cursor->children[cursor->count + 1] = nullptr;
+        if (cursor->count >= (MAX + 1) / 2) {
             return;
         }
         if (leftSibling >= 0) {
-            Node* leftNode = parent->ptr[leftSibling];
-            if (leftNode->size >= (MAX + 1) / 2 + 1) {
-                for (int i = cursor->size; i > 0; i--) {
+            Node* leftNode = parent->children[leftSibling];
+            if (leftNode->count >= (MAX + 1) / 2 + 1) {
+                for (int i = cursor->count; i > 0; i--) {
                     cursor->key[i] = cursor->key[i - 1];
-                    cursor->data[i] = cursor->data[i - 1];
+                    cursor->value[i] = cursor->value[i - 1];
                 }
-                cursor->size++;
-                cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
-                cursor->ptr[cursor->size - 1] = nullptr;
-                cursor->key[0] = leftNode->key[leftNode->size - 1];
-                cursor->data[0] = leftNode->data[leftNode->size - 1];
-                leftNode->size--;
-                leftNode->ptr[leftNode->size] = cursor;
-                leftNode->ptr[leftNode->size + 1] = nullptr;
+                cursor->count++;
+                cursor->children[cursor->count] = cursor->children[cursor->count - 1];
+                cursor->children[cursor->count - 1] = nullptr;
+                cursor->key[0] = leftNode->key[leftNode->count - 1];
+                cursor->value[0] = leftNode->value[leftNode->count - 1];
+                leftNode->count--;
+                leftNode->children[leftNode->count] = cursor;
+                leftNode->children[leftNode->count + 1] = nullptr;
                 parent->key[leftSibling] = cursor->key[0];
-                parent->data[leftSibling] = cursor->data[0];
+                parent->value[leftSibling] = cursor->value[0];
                 return;
             }
         }
-        if (rightSibling <= parent->size) {
-            Node* rightNode = parent->ptr[rightSibling];
-            if (rightNode->size >= (MAX + 1) / 2 + 1) {
-                cursor->size++;
-                cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
-                cursor->ptr[cursor->size - 1] = nullptr;
-                cursor->key[cursor->size - 1] = rightNode->key[0];
-                cursor->data[cursor->size - 1] = rightNode->data[0];
-                rightNode->size--;
-                rightNode->ptr[rightNode->size] = rightNode->ptr[rightNode->size + 1];
-                rightNode->ptr[rightNode->size + 1] = nullptr;
+        if (rightSibling <= parent->count) {
+            Node* rightNode = parent->children[rightSibling];
+            if (rightNode->count >= (MAX + 1) / 2 + 1) {
+                cursor->count++;
+                cursor->children[cursor->count] = cursor->children[cursor->count - 1];
+                cursor->children[cursor->count - 1] = nullptr;
+                cursor->key[cursor->count - 1] = rightNode->key[0];
+                cursor->value[cursor->count - 1] = rightNode->value[0];
+                rightNode->count--;
+                rightNode->children[rightNode->count] = rightNode->children[rightNode->count + 1];
+                rightNode->children[rightNode->count + 1] = nullptr;
 
-                for (int i = 0; i < rightNode->size; i++) {
+                for (int i = 0; i < rightNode->count; i++) {
                     rightNode->key[i] = rightNode->key[i + 1];
-                    rightNode->data[i] = rightNode->data[i + 1];
+                    rightNode->value[i] = rightNode->value[i + 1];
                 }
 
                 parent->key[rightSibling - 1] = rightNode->key[0];
-                parent->data[rightSibling - 1] = rightNode->data[0];
+                parent->value[rightSibling - 1] = rightNode->value[0];
                 return;
             }
         }
         if (leftSibling >= 0) {
-            Node* leftNode = parent->ptr[leftSibling];
-            for (int i = leftNode->size, j = 0; j < cursor->size; i++, j++) {
+            Node* leftNode = parent->children[leftSibling];
+            for (int i = leftNode->count, j = 0; j < cursor->count; i++, j++) {
                 leftNode->key[i] = cursor->key[j];
-                leftNode->data[i] = cursor->data[j];
+                leftNode->value[i] = cursor->value[j];
             }
-            leftNode->ptr[leftNode->size] = nullptr;
-            leftNode->size += cursor->size;
-            leftNode->ptr[leftNode->size] = cursor->ptr[cursor->size];
-            removeInternal(parent->key[leftSibling], *parent->data[leftSibling], parent, cursor);
+            leftNode->children[leftNode->count] = nullptr;
+            leftNode->count += cursor->count;
+            leftNode->children[leftNode->count] = cursor->children[cursor->count];
+            removeInternal(parent->key[leftSibling], parent->value[leftSibling], parent, cursor);
 
             delete cursor;
         }  
-        else if (rightSibling <= parent->size) {
-            Node* rightNode = parent->ptr[rightSibling];
-            for (int i = cursor->size, j = 0; j < rightNode->size; i++, j++) {
+        else if (rightSibling <= parent->count) {
+            Node* rightNode = parent->children[rightSibling];
+            for (int i = cursor->count, j = 0; j < rightNode->count; i++, j++) {
                 cursor->key[i] = rightNode->key[j];
-                cursor->data[i] = rightNode->data[j];
+                cursor->value[i] = rightNode->value[j];
             }
-            cursor->ptr[cursor->size] = nullptr;
-            cursor->size += rightNode->size;
-            cursor->ptr[cursor->size] = rightNode->ptr[rightNode->size];
+            cursor->children[cursor->count] = nullptr;
+            cursor->count += rightNode->count;
+            cursor->children[cursor->count] = rightNode->children[rightNode->count];
             cout << "Merging two leaf nodes\n";
-            removeInternal(parent->key[rightSibling - 1], *parent->data[rightSibling - 1], parent, rightNode);
+            removeInternal(parent->key[rightSibling - 1], parent->value[rightSibling - 1], parent, rightNode);
 
             delete rightNode;
         }
@@ -533,17 +554,17 @@ void BPlusTree<TK,TV>::remove(TK x) {
 template <typename TK, typename TV>
 void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node *cursor, Node *child) {
     if (cursor == root) {
-        if (cursor->size == 1) {
-            if (cursor->ptr[1] == child) {
+        if (cursor->count == 1) {
+            if (cursor->children[1] == child) {
                 delete child;
-                root = cursor->ptr[0];
+                root = cursor->children[0];
                 delete cursor;
                 cout << "Changed root node\n";
                 return;
             } 
-            else if (cursor->ptr[0] == child) {
+            else if (cursor->children[0] == child) {
                 delete child;
-                root = cursor->ptr[1];
+                root = cursor->children[1];
                 delete cursor;
                 cout << "Changed root node\n";
                 return;
@@ -551,25 +572,25 @@ void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node *cursor, Node *child) {
         }
     }
     int pos;
-    for (pos = 0; pos < cursor->size; pos++) {
+    for (pos = 0; pos < cursor->count; pos++) {
         if (cursor->key[pos] == x) {
             break;
         }
     }
-    for (int i = pos; i < cursor->size; i++) {
+    for (int i = pos; i < cursor->count; i++) {
         cursor->key[i] = cursor->key[i + 1];
-        cursor->data[i] = cursor->data[i + 1];
+        cursor->value[i] = cursor->value[i + 1];
     }
-    for (pos = 0; pos < cursor->size + 1; pos++) {
-        if (cursor->ptr[pos] == child) {
+    for (pos = 0; pos < cursor->count + 1; pos++) {
+        if (cursor->children[pos] == child) {
             break;
         }
     }
-    for (int i = pos; i < cursor->size + 1; i++) {
-        cursor->ptr[i] = cursor->ptr[i + 1];
+    for (int i = pos; i < cursor->count + 1; i++) {
+        cursor->children[i] = cursor->children[i + 1];
     }
-    cursor->size--;
-    if (cursor->size >= (MAX + 1) / 2 - 1) {
+    cursor->count--;
+    if (cursor->count >= (MAX + 1) / 2 - 1) {
         return;
     }
     if (cursor == root)
@@ -578,8 +599,8 @@ void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node *cursor, Node *child) {
     Node* parent = findParent(root, cursor);
     int leftSibling, rightSibling;
 
-    for (pos = 0; pos < parent->size + 1; pos++) {
-        if (parent->ptr[pos] == cursor) {
+    for (pos = 0; pos < parent->count + 1; pos++) {
+        if (parent->children[pos] == cursor) {
             leftSibling = pos - 1;
             rightSibling = pos + 1;
             break;
@@ -587,82 +608,82 @@ void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node *cursor, Node *child) {
     }
 
     if (leftSibling >= 0) {
-        Node* leftNode = parent->ptr[leftSibling];
-        if (leftNode->size >= (MAX + 1) / 2) {
-            for (int i = cursor->size; i > 0; i--) {
+        Node* leftNode = parent->children[leftSibling];
+        if (leftNode->count >= (MAX + 1) / 2) {
+            for (int i = cursor->count; i > 0; i--) {
                 cursor->key[i] = cursor->key[i - 1];
-                cursor->data[i] = cursor->data[i - 1];
+                cursor->value[i] = cursor->value[i - 1];
             }
             cursor->key[0] = parent->key[leftSibling];
-            cursor->data[0] = parent->data[leftSibling];
+            cursor->value[0] = parent->value[leftSibling];
 
-            parent->key[leftSibling] = leftNode->key[leftNode->size - 1];
-            parent->data[leftSibling] = leftNode->data[leftNode->size - 1];
+            parent->key[leftSibling] = leftNode->key[leftNode->count - 1];
+            parent->value[leftSibling] = leftNode->value[leftNode->count - 1];
 
-            for (int i = cursor->size + 1; i > 0; i--) {
-                cursor->ptr[i] = cursor->ptr[i - 1];
+            for (int i = cursor->count + 1; i > 0; i--) {
+                cursor->children[i] = cursor->children[i - 1];
             }
-            cursor->ptr[0] = leftNode->ptr[leftNode->size];
-            cursor->size++;
-            leftNode->size--;
+            cursor->children[0] = leftNode->children[leftNode->count];
+            cursor->count++;
+            leftNode->count--;
             return;
         }
     }
-    if (rightSibling <= parent->size) {
-        Node* rightNode = parent->ptr[rightSibling];
+    if (rightSibling <= parent->count) {
+        Node* rightNode = parent->children[rightSibling];
 
-        if (rightNode->size >= (MAX + 1) / 2) {
-            cursor->key[cursor->size] = parent->key[pos];
-            cursor->data[cursor->size] = parent->data[pos];
+        if (rightNode->count >= (MAX + 1) / 2) {
+            cursor->key[cursor->count] = parent->key[pos];
+            cursor->value[cursor->count] = parent->value[pos];
             parent->key[pos] = rightNode->key[0];
-            parent->data[pos] = rightNode->data[0];
+            parent->value[pos] = rightNode->value[0];
 
-            for (int i = 0; i < rightNode->size - 1; i++) {
+            for (int i = 0; i < rightNode->count - 1; i++) {
                 rightNode->key[i] = rightNode->key[i + 1];
-                rightNode->data[i] = rightNode->data[i + 1];
+                rightNode->value[i] = rightNode->value[i + 1];
             }
-            cursor->ptr[cursor->size + 1] = rightNode->ptr[0];
-            for (int i = 0; i < rightNode->size; ++i) {
-                rightNode->ptr[i] = rightNode->ptr[i + 1];
+            cursor->children[cursor->count + 1] = rightNode->children[0];
+            for (int i = 0; i < rightNode->count; ++i) {
+                rightNode->children[i] = rightNode->children[i + 1];
             }
-            cursor->size++;
-            rightNode->size--;
+            cursor->count++;
+            rightNode->count--;
             return;
         }
     }
     if (leftSibling >= 0) {
-        Node* leftNode = parent->ptr[leftSibling];
-        leftNode->key[leftNode->size] = parent->key[leftSibling];
-        leftNode->data[leftNode->size] = parent->data[leftSibling];
+        Node* leftNode = parent->children[leftSibling];
+        leftNode->key[leftNode->count] = parent->key[leftSibling];
+        leftNode->value[leftNode->count] = parent->value[leftSibling];
 
-        for (int i = leftNode->size + 1, j = 0; j < cursor->size; j++) {
+        for (int i = leftNode->count + 1, j = 0; j < cursor->count; j++) {
             leftNode->key[i] = cursor->key[j];
-            leftNode->data[i] = cursor->data[j];
+            leftNode->value[i] = cursor->value[j];
         }
-        for (int i = leftNode->size + 1, j = 0; j < cursor->size + 1; j++) {
-            leftNode->ptr[i] = cursor->ptr[j];
-            cursor->ptr[j] = nullptr;
+        for (int i = leftNode->count + 1, j = 0; j < cursor->count + 1; j++) {
+            leftNode->children[i] = cursor->children[j];
+            cursor->children[j] = nullptr;
         }
-        leftNode->size += cursor->size + 1;
-        cursor->size = 0;
-        removeInternal(parent->key[leftSibling], *parent->data[leftSibling], parent, cursor);
+        leftNode->count += cursor->count + 1;
+        cursor->count = 0;
+        removeInternal(parent->key[leftSibling], parent->value[leftSibling], parent, cursor);
     } 
-    else if (rightSibling <= parent->size) {
-        Node *rightNode = parent->ptr[rightSibling];
-        cursor->key[cursor->size] = parent->key[rightSibling - 1];
-        cursor->data[cursor->size] = parent->data[rightSibling - 1];
+    else if (rightSibling <= parent->count) {
+        Node *rightNode = parent->children[rightSibling];
+        cursor->key[cursor->count] = parent->key[rightSibling - 1];
+        cursor->value[cursor->count] = parent->value[rightSibling - 1];
 
-        for (int i = cursor->size + 1, j = 0; j < rightNode->size; j++) {
+        for (int i = cursor->count + 1, j = 0; j < rightNode->count; j++) {
             cursor->key[i] = rightNode->key[j];
-            cursor->data[i] = rightNode->data[j];
+            cursor->value[i] = rightNode->value[j];
         }
-        for (int i = cursor->size + 1, j = 0; j < rightNode->size + 1; j++) {
-            cursor->ptr[i] = rightNode->ptr[j];
-            rightNode->ptr[j] = nullptr;
+        for (int i = cursor->count + 1, j = 0; j < rightNode->count + 1; j++) {
+            cursor->children[i] = rightNode->children[j];
+            rightNode->children[j] = nullptr;
         }
-        cursor->size += rightNode->size + 1;
-        rightNode->size = 0;
-        removeInternal(parent->key[rightSibling - 1], *parent->data[rightSibling - 1], parent, rightNode);
+        cursor->count += rightNode->count + 1;
+        rightNode->count = 0;
+        removeInternal(parent->key[rightSibling - 1], parent->value[rightSibling - 1], parent, rightNode);
     }
 }   
 

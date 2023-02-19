@@ -29,20 +29,14 @@ class Transfer : public Record
         Transfer(double amount, string sender, string receiver);
         void print(ostream& os) const override;
 
-        // For indexing
-        string get_sender(){ 
-            return sender;
-        }
-        string get_receiver(){
-            return receiver;
-        }
+        string get_sender();
+        string get_receiver();
+        double get_amount();
     
     private:
         double amount; // CapyCoins! :)
         string sender;
         string receiver;
-
-    friend class indexing;
 };
 
 // Record implementation
@@ -87,55 +81,20 @@ ostream& operator<<(ostream& os, const Record& record)
     return os;
 }
 
+string Transfer::get_sender()
+{ 
+    return sender;
+}
 
-// class Transfer
-// {
-//     public:
-//         Transfer();
-//         Transfer(double amount, string sender, string receiver);
-//         friend ostream& operator<<(ostream& os, const Transfer& transfer);
+string Transfer::get_receiver()
+{
+    return receiver;
+}
 
-//         // For indexing
-//         string get_sender(){ 
-//             return sender;
-//         }
-//         string get_receiver(){
-//             return receiver;
-//         }
-
-//     private:
-//         double amount; // CapyCoins! :)
-//         time_t time_stamp;
-//         string sender;
-//         string receiver;
-
-// };
-
-
-// Transfer::Transfer()
-// {
-//     this->time_stamp = time(nullptr);
-//     this->amount = 0.0;
-//     this->sender = "";
-//     this->receiver = "";
-// }
-
-// Transfer::Transfer(double amount, string sender, string receiver)
-// {
-//     this->time_stamp = time(nullptr);
-//     this->amount = amount;
-//     this->sender = sender;
-//     this->receiver = receiver;
-// }
-
-// ostream& operator<<(ostream& os, const Transfer& transfer)
-// {
-//     os << "\tDate: " << ctime(&transfer.time_stamp);
-//     os << "\tAmount: " << transfer.amount << " CapyCoins\n";
-//     os << "\tSender: " << transfer.sender << "\n";
-//     os << "\tReceiver: " << transfer.receiver << "\n";
-//     return os;
-// }
+double Transfer::get_amount()
+{
+    return amount;
+}
 
 
 # endif // RECORD_H

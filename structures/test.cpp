@@ -1,5 +1,3 @@
-# include <iostream>
-# include <vector>
 # include "b+tree.h"
 
 struct Transfer
@@ -34,28 +32,28 @@ ostream& operator<<(ostream& os, const Transfer& transfer)
 
 int main()
 {
-    BPlusTree<double,Transfer> tree;
+    BPlusTree<double, Transfer*> tree;
 
-    tree.insert(5, Transfer(5, "Luis", "Pierina"));
-    tree.insert(35, Transfer(35, "Luis", "Pierina"));
-    tree.insert(45, Transfer(45, "Luis", "Pierina"));
-    tree.insert(90, Transfer(90, "Diego", "Alberto"));
-    tree.insert(15, Transfer(15, "Luis", "Pierina"));
-    tree.insert(65, Transfer(65, "Luis", "Pierina"));
-    tree.insert(75, Transfer(75, "Luis", "Pierina"));
-    tree.insert(20, Transfer(20, "Luis", "Pierina"));
-    tree.insert(10, Transfer(10, "Luis", "Pierina"));
-    tree.insert(100, Transfer(100, "Luis", "Pierina"));
-    tree.insert(80, Transfer(80, "Luis", "Pierina"));
-    tree.insert(50, Transfer(50, "Luciana", "Mafer"));
-    
+    vector<double> amounts = {5, 35, 45, 90, 15, 65, 75, 20, 10, 100, 80, 50};
+
+    for (const double& amount : amounts) {
+        tree.insert(amount, new Transfer(amount, "Luis", "Pierina"));
+    }
 
     tree.displayPretty();
     cout << "\n";
 
-    tree.search(90);
-    tree.search(50);
+    cout << *tree.search(90) << "\n";
+    cout << *tree.search(50) << "\n";
+    cout << *tree.min() << "\n";
+    cout << *tree.max() << "\n";
+    cout << "\nrangeSearch(15, 65)\n";
 
+    vector<Transfer*> transfers = tree.rangeSearch(15, 65);
+
+    for (auto& transfer : transfers) {
+        cout << *transfer << "\n";
+    }
 
     
 

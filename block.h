@@ -21,6 +21,7 @@ class Block
         Block();
         void insert(T feature);
         T remove(size_t index);
+        int size();
 
         void set_nonce(size_t new_nonce);
         bool mine();
@@ -51,6 +52,12 @@ template <typename T, size_t N>
 T Block<T, N>::remove(size_t index)
 {
     return data.remove(index);
+}
+
+template <typename T, size_t N>
+int Block<T, N>::size()
+{
+    return data.size();
 }
 
 template <typename T, size_t N>
