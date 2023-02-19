@@ -32,28 +32,30 @@ ostream& operator<<(ostream& os, const Transfer& transfer)
 
 int main()
 {
-    BPlusTree<double, Transfer*> tree;
+    auto tree = new BPlusTree<double, Transfer*>();
 
     vector<double> amounts = {5, 35, 45, 90, 15, 65, 75, 20, 10, 100, 80, 50};
 
     for (const double& amount : amounts) {
-        tree.insert(amount, new Transfer(amount, "Luis", "Pierina"));
+        tree->insert(amount, new Transfer(amount, "Luis", "Pierina"));
     }
 
-    tree.displayPretty();
+    tree->displayPretty();
     cout << "\n";
 
-    cout << *tree.search(90) << "\n";
-    cout << *tree.search(50) << "\n";
-    cout << *tree.min() << "\n";
-    cout << *tree.max() << "\n";
+    cout << *tree->search(90) << "\n";
+    cout << *tree->search(50) << "\n";
+    cout << *tree->min() << "\n";
+    cout << *tree->max() << "\n";
     cout << "\nrangeSearch(15, 65)\n";
 
-    vector<Transfer*> transfers = tree.rangeSearch(15, 65);
+    vector<Transfer*> transfers = tree->rangeSearch(15, 65);
 
     for (auto& transfer : transfers) {
         cout << *transfer << "\n";
     }
+
+    delete tree;
 
     
 

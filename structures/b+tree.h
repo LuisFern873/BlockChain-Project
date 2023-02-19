@@ -16,13 +16,13 @@ class BPlusTree
 {
     public:
         BPlusTree();
-        TV search(TK key);
-        vector<TV> rangeSearch(TK start, TK end);
-        TV min();
-        TV max();
-
+        ~BPlusTree();
         void insert(TK key, TV value);
         void remove(TK key);
+        TV min();
+        TV max();
+        TV search(TK key);
+        vector<TV> rangeSearch(TK start, TK end);
         void displayPretty();
         int height();
 
@@ -57,7 +57,7 @@ BPlusTree<TK,TV>::Node::Node()
 }
 
 template <typename TK, typename TV>
-BPlusTree<TK,TV>::Node::~Node()
+BPlusTree<TK, TV>::Node::~Node()
 {
     delete[] key;
     delete[] value;
@@ -68,6 +68,14 @@ template <typename TK, typename TV>
 BPlusTree<TK,TV>::BPlusTree() 
 {
     root = nullptr;
+}
+
+template <typename TK, typename TV>
+BPlusTree<TK, TV>::~BPlusTree()
+{
+    if (root != nullptr) {
+        delete root;
+    }
 }
 
 template <typename TK, typename TV>

@@ -7,7 +7,7 @@ int main()
 {
     BlockChain<Transfer> chain;
 
-    DataManager::load("assets/transfers.csv", chain);
+    DataManager::load("assets/100_transfers.csv", chain);
 
     Index index;
 
