@@ -37,7 +37,7 @@ struct Index
     }
 
     // Max value and Min Value Request O(logn)
-    void create_BPlustree_index(BlockChain<Transfer>& blockchain)
+    void create_BPlusTree_index(BlockChain<Transfer>& blockchain)
     {
         double amount;
         Transfer* ptr;
@@ -83,8 +83,6 @@ struct Index
     {
         return amount_index.rangeSearch(start, end);
     }
-
-
 
     BPlusTree<double, Transfer*> amount_index;
     ChainHash<string, Transfer*> sender_index;

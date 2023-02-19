@@ -12,12 +12,7 @@ int main()
     Index index;
 
     index.create_hash_index(chain);
-
-
-    // cout << index.EqualTo(Member::sender, "Raja") << "\n";
-    // cout << index.EqualTo(Member::receiver, "Mannix") << "\n";
-    // cout << index.EqualTo(Member::sender, "Mannix") << "\n";
-
+    index.create_BPlusTree_index(chain);
 
     auto menu = Menu::init(chain, index);
     menu->display_main();

@@ -3,42 +3,13 @@
 
 # include <iostream>
 # include <vector>
+# include <climits>
+# include <fstream>
+# include <sstream>
 
 using namespace std;
 
 int MAX = 5;
-
-template <typename TK, typename TV>
-struct Node
-{
-    TK* key;
-    TV* value;
-
-    Node** children;
-    int count;
-    bool leaf;
-    
-    Node();
-    ~Node();
-};
-
-template <typename TK, typename TV>
-Node<TK,TV>::Node()
-{
-    count = 0;
-    key = new TK[MAX];
-    value = new TV[MAX];
-    children = new Node*[MAX + 1];
-}
-
-template <typename TK, typename TV>
-Node<TK,TV>::~Node()
-{
-    delete[] key;
-    delete[] value;
-    delete[] children;
-}
-
 
 template <typename TK, typename TV>
 class BPlusTree
@@ -56,14 +27,42 @@ class BPlusTree
         int height();
 
     private:
-        using Node = Node<TK,TV>;
+        struct Node {
+            TK* key;
+            TV* value;
+
+            Node** children;
+            int count;
+            bool leaf;
+    
+            Node();
+            ~Node();
+        };
+
         Node* root;
         void rangeSearch(Node* node, TK start, TK end, vector<TV>& report);
         void insertInternal(TK, TV, Node*, Node*);
         Node* findParent(Node*, Node*);
         void displayGivenLevel(Node* node, int level);
-        void removeInternal(TK x, TV y, Node *cursor, Node *child);
+        void removeInternal(TK x, TV y, Node* cursor, Node* child);
 };
+
+template <typename TK, typename TV>
+BPlusTree<TK,TV>::Node::Node()
+{
+    count = 0;
+    key = new TK[MAX];
+    value = new TV[MAX];
+    children = new Node*[MAX + 1];
+}
+
+template <typename TK, typename TV>
+BPlusTree<TK,TV>::Node::~Node()
+{
+    delete[] key;
+    delete[] value;
+    delete[] children;
+}
 
 template <typename TK, typename TV>
 BPlusTree<TK,TV>::BPlusTree() 
@@ -389,7 +388,7 @@ void BPlusTree<TK,TV>::insertInternal(TK x, TV y, Node* cursor, Node* child)
 
 
 template <typename TK, typename TV>
-Node<TK,TV>* BPlusTree<TK,TV>::findParent(Node* cursor, Node* child) 
+BPlusTree<TK,TV>::Node* BPlusTree<TK,TV>::findParent(Node* cursor, Node* child) 
 {
     Node* parent;
     
@@ -552,7 +551,7 @@ void BPlusTree<TK,TV>::remove(TK x) {
 }
 
 template <typename TK, typename TV>
-void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node *cursor, Node *child) {
+void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node* cursor, Node* child) {
     if (cursor == root) {
         if (cursor->count == 1) {
             if (cursor->children[1] == child) {
@@ -669,7 +668,7 @@ void BPlusTree<TK,TV>::removeInternal(TK x, TV y, Node *cursor, Node *child) {
         removeInternal(parent->key[leftSibling], parent->value[leftSibling], parent, cursor);
     } 
     else if (rightSibling <= parent->count) {
-        Node *rightNode = parent->children[rightSibling];
+        Node* rightNode = parent->children[rightSibling];
         cursor->key[cursor->count] = parent->key[rightSibling - 1];
         cursor->value[cursor->count] = parent->value[rightSibling - 1];
 

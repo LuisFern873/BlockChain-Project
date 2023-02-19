@@ -28,7 +28,11 @@ class Menu
 
         void display_transfer();
 
+        // Query menus :)
         void display_equal_to();
+        void display_range_search();
+        void display_max();
+        void display_min();
 };
 
 Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
@@ -149,14 +153,17 @@ void Menu::display_query()
         display_equal_to();
         break;
     case 2:
+        display_range_search();
         break;
     case 3:
         break;
     case 4:
         break;
     case 5:
+        display_max();
         break;
     case 6:
+        display_min();
         break;
     case 7:
         chain->display();
@@ -188,6 +195,36 @@ void Menu::display_equal_to()
     cin >> name;
 
     cout << index->EqualTo(member, name) << "\n";
+
+    display_query();
+}
+
+void Menu::display_range_search()
+{
+    double start, end;
+    cout << "Start: ";
+    cin >> start;
+    cout << "End: ";
+    cin >> end;
+
+    vector<Transfer*> transfers = index->RangeSearch(start, end);
+
+    for (auto& transfer : transfers)
+        cout << *transfer << "\n";
+
+    display_query();
+}
+
+void Menu::display_max()
+{
+    cout << index->MaxValue() << "\n";
+
+    display_query();
+}
+
+void Menu::display_min()
+{
+    cout << index->MinValue() << "\n";
 
     display_query();
 }

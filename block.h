@@ -73,7 +73,7 @@ bool Block<T, N>::mine()
     if (!data.is_full())
         throw runtime_error("Mining a non full block is not allowed");
     
-    cout << "Mining block #" << id << "...\n";
+    // cout << "Mining block #" << id << "...\n";
     size_t nonce = 0;
     const size_t MAX_NONCE = 1'000'000;
 
