@@ -58,6 +58,8 @@ bool Block<T, N>::mine()
 
 ## 5. Estructuras de datos de indexación y consultas
 
+### EqualTo
+Para esta consulta se utilizó un de `ChainHash` implementado con array de `ForwardList`.
 
 ```cpp
 template <typename TK, typename TV>
@@ -81,13 +83,53 @@ class ChainHash
 		};
 
 		ForwardList<Entry>* array;
-		int capacity;
-	    int size;
         ...
 };
 ```
 
+### RangeSearh, MaxValue y MinValue
+Para estas 3 consultas se utilizó un `B+ Tree`. 
 
+```cpp
+template <typename TK, typename TV>
+class BPlusTree
+{
+    public:
+        BPlusTree();
+        ~BPlusTree();
+        void insert(TK key, TV value);
+        void remove(TK key);
+        TV min();
+        TV max();
+        TV search(TK key);
+        vector<TV> rangeSearch(TK start, TK end);
+        void displayPretty();
+        int height();
+
+    private:
+        struct Node {
+            TK* key;
+            TV* value;
+
+            Node** children;
+            int count;
+            bool leaf;
+    
+            Node();
+            ~Node();
+        };
+
+        Node* root;
+        ...
+}
+```
+
+### StartWith y Contains
+Para estas 2 consultas se utilizó un `Trie estándar`.
+
+```cpp
+
+```
 
 ## 6. Análisis Big-O
 

@@ -2,7 +2,7 @@
 # define CHAIN_HASH_H
 
 # include <iostream>
-# include <forward_list>
+# include "forwardlist.h"
 
 using namespace std;
 
@@ -11,6 +11,7 @@ class ChainHash
 {
 	public:
     	ChainHash();
+		~ChainHash();
 		void insert(TK key, TV value);
 		void remove(TK key);
 		TV find(TK key);
@@ -21,10 +22,11 @@ class ChainHash
 			TK key;
 			TV value;
 
+			Entry() = default;
 			Entry(TK key, TV value);
 		};
 
-		forward_list<Entry>* array;
+		ForwardList<Entry>* array;
 		int capacity;
 	    int size;
 		const int MAX_COLLISIONS = 3;
@@ -46,8 +48,14 @@ template <typename TK, typename TV>
 ChainHash<TK,TV>::ChainHash()
 {
 	capacity = 10; 
-	array = new forward_list<Entry>[capacity];
+	array = new ForwardList<Entry>[capacity];
 	size = 0;
+}
+
+template <typename TK, typename TV>
+ChainHash<TK,TV>::~ChainHash()
+{
+	delete[] array;
 }
 
 template <typename TK, typename TV>
@@ -59,12 +67,11 @@ void ChainHash<TK,TV>::insert(TK key, TV value)
 	size_t index = hash_function(key);
 	auto& chain = array[index];
 
-	for(auto& entry : chain){
-		if(entry.key == key)
-			entry.value = value;
+	for(int i = 0; i < chain.size(); ++i){
+		if(chain[i].key == key)
+			chain[i].value = value;
 	}
-
-	Entry entry = {key, value};
+	Entry entry(key, value);
 	chain.push_front(entry);
 	++size;
 }
@@ -75,11 +82,12 @@ TV ChainHash<TK,TV>::find(TK key)
 	size_t index = hash_function(key);
 	auto& chain = array[index];
 
-	for(auto& entry : chain){
-		if(entry.key == key)
-			return entry.value;
+	for(int i = 0; i < chain.size(); ++i){
+		if(chain[i].key == key)
+			return chain[i].value;
 	}
-	throw invalid_argument("Key not found");
+	cout << "Key not found.\n"; 
+	return TV();
 }
 
 template <typename TK, typename TV>
@@ -88,12 +96,11 @@ void ChainHash<TK,TV>::remove(TK key)
 	size_t index = hash_function(key);
 	auto& chain = array[index];
 
-	auto count = chain.remove_if([&](const Entry& entry){ 
-		return entry.key == key;
-	});
-
-	if(!count)
-		throw invalid_argument("Key not found");
+	for(int i = 0; i < chain.size(); ++i){
+		if(chain[i].key == key)
+			chain.remove(i);
+	}
+	cout << "Key not found.\n"; 
 }
 
 template <typename TK, typename TV>
@@ -102,10 +109,10 @@ void ChainHash<TK,TV>::display()
 	size_t index = 0;
 	for(int i = 0; i < capacity; ++i){
 	    cout << index++ << "\t";
-		const auto& chain = array[i];
-	    for(const auto& entry : chain){
-			cout << "{" << entry.key << ": " << entry.value << "} ⟶  ";
-	    }
+		auto& chain = array[i];
+		for(int i = 0; i < chain.size(); ++i){
+			cout << "{" << chain[i].key << ": " << chain[i].value << "} ⟶  ";
+		}
 	    cout << "null\n";
 	}
 	cout << "\n";
@@ -128,12 +135,12 @@ template <typename TK, typename TV>
 void ChainHash<TK,TV>::rehashing()
 {
 	capacity *= 2;
-	auto temporal = new forward_list<Entry>[capacity];
+	auto temporal = new ForwardList<Entry>[capacity];
 	for(int i = 0; i < capacity / 2; ++i){
-		const auto& chain = array[i];
-		for(const auto& entry : chain){
-			size_t index = hash_function(entry.key);
-			temporal[index].push_front(entry);
+		auto& chain = array[i];
+		for(int i = 0; i < chain.size(); ++i){
+			size_t index = hash_function(chain[i].key);
+			temporal[index].push_front(chain[i]);
 		}
 	}
     delete[] array;
