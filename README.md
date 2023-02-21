@@ -59,6 +59,36 @@ bool Block<T, N>::mine()
 ## 5. Estructuras de datos de indexación y consultas
 
 
+```cpp
+template <typename TK, typename TV>
+class ChainHash
+{
+	public:
+    	ChainHash();
+		~ChainHash();
+		void insert(TK key, TV value);
+		void remove(TK key);
+		TV find(TK key);
+		void display();
+
+	private:
+		struct Entry {
+			TK key;
+			TV value;
+
+			Entry() = default;
+			Entry(TK key, TV value);
+		};
+
+		ForwardList<Entry>* array;
+		int capacity;
+	    int size;
+        ...
+};
+```
+
+
+
 ## 6. Análisis Big-O
 
 ## 7. Conclusiones
