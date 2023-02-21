@@ -6,60 +6,52 @@
 
 using namespace std;
 
-template <typename K, typename V>
-struct Entry
-{
-	K key;
-	V value;
-
-	Entry(K key, V value);
-};
-
-template <typename K, typename V>
+template <typename TK, typename TV>
 class ChainHash
 {
 	public:
     	ChainHash();
-		void insert(K key, V value);
-		void remove(K key);
-		V find(K key);
+		void insert(TK key, TV value);
+		void remove(TK key);
+		TV find(TK key);
 		void display();
 
 	private:
-		forward_list<Entry<K,V>>* array;
+		struct Entry {
+			TK key;
+			TV value;
+
+			Entry(TK key, TV value);
+		};
+
+		forward_list<Entry>* array;
 		int capacity;
 	    int size;
 		const int MAX_COLLISIONS = 3;
 		const float MAX_LOAD_FACTOR = 0.5;
 
 		float load_factor();
-		size_t hash_function(K key);
+		size_t hash_function(TK key);
 		void rehashing();
 };
 
 // Entry implementation
 
-template <typename K, typename V>
-Entry<K,V>::Entry(K key, V value) : key(key), value(value) {}
-
-template <typename K, typename V>
-ostream& operator<<(ostream& os, const Entry<K,V>& entry){
-	os << "{" << entry.key << ": " << entry.value << "}";
-	return os;
-}
+template <typename TK, typename TV>
+ChainHash<TK,TV>::Entry::Entry(TK key, TV value) : key(key), value(value) {}
 
 // Chain Hash implementation
 
-template <typename K, typename V>
-ChainHash<K,V>::ChainHash()
+template <typename TK, typename TV>
+ChainHash<TK,TV>::ChainHash()
 {
 	capacity = 10; 
-	array = new forward_list<Entry<K,V>>[capacity];
+	array = new forward_list<Entry>[capacity];
 	size = 0;
 }
 
-template <typename K, typename V>
-void ChainHash<K,V>::insert(K key, V value)
+template <typename TK, typename TV>
+void ChainHash<TK,TV>::insert(TK key, TV value)
 {
 	if(load_factor() >= MAX_LOAD_FACTOR)
 		rehashing();
@@ -77,8 +69,8 @@ void ChainHash<K,V>::insert(K key, V value)
 	++size;
 }
 
-template <typename K, typename V>
-V ChainHash<K,V>::find(K key) 
+template <typename TK, typename TV>
+TV ChainHash<TK,TV>::find(TK key) 
 {
 	size_t index = hash_function(key);
 	auto& chain = array[index];
@@ -90,13 +82,13 @@ V ChainHash<K,V>::find(K key)
 	throw invalid_argument("Key not found");
 }
 
-template <typename K, typename V>
-void ChainHash<K,V>::remove(K key)
+template <typename TK, typename TV>
+void ChainHash<TK,TV>::remove(TK key)
 {
 	size_t index = hash_function(key);
 	auto& chain = array[index];
 
-	auto count = chain.remove_if([&](const Entry<K,V>& entry){ 
+	auto count = chain.remove_if([&](const Entry& entry){ 
 		return entry.key == key;
 	});
 
@@ -104,39 +96,39 @@ void ChainHash<K,V>::remove(K key)
 		throw invalid_argument("Key not found");
 }
 
-template <typename K, typename V>
-void ChainHash<K,V>::display() 
+template <typename TK, typename TV>
+void ChainHash<TK,TV>::display() 
 {
 	size_t index = 0;
 	for(int i = 0; i < capacity; ++i){
 	    cout << index++ << "\t";
 		const auto& chain = array[i];
 	    for(const auto& entry : chain){
-	        cout << entry << " ⟶  ";
+			cout << "{" << entry.key << ": " << entry.value << "} ⟶  ";
 	    }
 	    cout << "null\n";
 	}
 	cout << "\n";
 }
 
-template <typename K, typename V>
-float ChainHash<K,V>::load_factor()
+template <typename TK, typename TV>
+float ChainHash<TK,TV>::load_factor()
 {
 	return float(size) / (float(capacity) * float(MAX_COLLISIONS));
 }
 
-template <typename K, typename V>
-size_t ChainHash<K,V>::hash_function(K key)
+template <typename TK, typename TV>
+size_t ChainHash<TK,TV>::hash_function(TK key)
 {
-	static hash<K> hasher{};
+	static hash<TK> hasher{};
 	return hasher(key) % capacity;
 }
 
-template <typename K, typename V>
-void ChainHash<K,V>::rehashing()
+template <typename TK, typename TV>
+void ChainHash<TK,TV>::rehashing()
 {
 	capacity *= 2;
-	auto temporal = new forward_list<Entry<K,V>>[capacity];
+	auto temporal = new forward_list<Entry>[capacity];
 	for(int i = 0; i < capacity / 2; ++i){
 		const auto& chain = array[i];
 		for(const auto& entry : chain){
