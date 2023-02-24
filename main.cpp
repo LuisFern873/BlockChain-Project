@@ -9,11 +9,11 @@ int main()
 
     DataManager::load("assets/100_transfers.csv", chain);
 
-    Index index;
+    Index index(chain);
 
-    index.create_hash_index(chain);
-    index.create_BPlusTree_index(chain);
-    index.create_trie_index(chain);
+    index.create_hash_index();
+    index.create_tree_index();
+    index.create_trie_index();
 
     auto menu = Menu::init(chain, index);
     menu->display_main();

@@ -24,6 +24,8 @@ class Menu
         };
 
         void display_create();
+        void display_update();
+        void display_delete();
         void display_query();
 
         void display_transfer();
@@ -50,22 +52,21 @@ Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
 
 void Menu::display_main()
 {
-    cout << "------------------------------------------\n";
+    cout << "---------------------------------------------\n";
     cout << "∗∗∗∗∗∗∗∗∗∗∗∗ Welcome to CapyCoin ∗∗∗∗∗∗∗∗∗∗∗∗\n";
-    cout << "------------------------------------------\n";
+    cout << "---------------------------------------------\n";
     Capybara::display();
     cout << "1) Create transaction. 💰\n";
-    // cout << "2) Update transaction. 🖊️\n";
-    // cout << "3) Remove transaction. 🧶\n";
-    cout << "2) Query data. 📊\n";
-    cout << "3) Sign out. ❌\n";
-    cout << "Enter an option: ";
+    cout << "2) Update transaction. 🖊️\n";
+    cout << "3) Remove transaction. 🧶\n";
+    cout << "4) Query data. 📊\n";
+    cout << "5) Sign out. ❌\n";
     
     short option;
     do {
         cout << "Enter an option: ";
         cin >> option;
-    } while ( 1 > option or option > 3);
+    } while ( 1 > option or option > 5);
 
     cout << "\n";
 
@@ -75,9 +76,15 @@ void Menu::display_main()
         display_create();
         break;
     case 2:
-        display_query();
+        display_update();
         break;
     case 3:
+        display_delete();
+        break;
+    case 4:
+        display_query();
+        break;
+    case 5:
         cout << "Thank you for your preference!\n";
         break;
     }
@@ -114,6 +121,39 @@ void Menu::display_create()
     }
 }
 
+void Menu::display_update()
+{
+    size_t id_block;
+    size_t id_transaction;
+    cout << "Id block: ";
+    cin >> id_block;
+    cout << "Id transaction: ";
+    cin >> id_transaction;
+
+    // cout << (*chain)[id_block];
+
+    string sender;
+    string receiver;
+    double amount;
+    cout << "New amount: ";
+    cin >> amount;
+    cout << "New sender: ";
+    cin >> sender;
+    cout << "New receiver: ";
+    cin >> receiver;
+    
+    chain->update(Transfer{amount, sender, receiver}, id_block, id_transaction);
+    cout << "\n";
+
+    display_main();
+}
+
+
+void Menu::display_delete()
+{
+
+}
+
 void Menu::display_transfer()
 {
     string sender;
@@ -126,12 +166,13 @@ void Menu::display_transfer()
     cin >> sender;
     cout << "Receiver: ";
     cin >> receiver;
-    // Validar datos
-    chain->insert(Transfer(amount, sender, receiver));
 
-    cout << "The transfer was completed successfully. ✅\n";
-    cout << "Waiting to complete block...\n";
-    cout << *chain->block << "\n";
+    // Validar datos
+    chain->insert(Transfer{amount, sender, receiver});
+    DataManager::simulate("assets/10000_transfers.csv", *chain);
+    
+    
+    // cout << *chain->block << "\n";
     cout << "\n";
     display_create();
 }
