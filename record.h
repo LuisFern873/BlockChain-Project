@@ -28,7 +28,8 @@ class Transfer : public Record
         Transfer();
         Transfer(double amount, string sender, string receiver);
         void print(ostream& os) const override;
-
+        
+        size_t id_block;
         string get_sender();
         string get_receiver();
         double get_amount();

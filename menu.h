@@ -2,6 +2,7 @@
 # define MENU_H
 
 # include <iostream>
+# include <conio.h>
 # include "blockchain.h"
 # include "index.h"
 
@@ -26,9 +27,7 @@ class Menu
         void display_create();
         void display_update();
         void display_delete();
-        void display_query();
-
-        void display_transfer();
+        void display_request();
 
         // Query menus :)
         void display_equal_to();
@@ -38,6 +37,8 @@ class Menu
         void display_max();
         void display_min();
         void display_ledger();
+
+        void pause();
 };
 
 Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
@@ -56,10 +57,10 @@ void Menu::display_main()
     cout << "∗∗∗∗∗∗∗∗∗∗∗∗ Welcome to CapyCoin ∗∗∗∗∗∗∗∗∗∗∗∗\n";
     cout << "---------------------------------------------\n";
     Capybara::display();
-    cout << "1) Create transaction. 💰\n";
-    cout << "2) Update transaction. 🖊️\n";
-    cout << "3) Remove transaction. 🧶\n";
-    cout << "4) Query data. 📊\n";
+    cout << "1) Create transfer. 💰\n";
+    cout << "2) Update transfer. 🖊️\n";
+    cout << "3) Remove transfer. 🧶\n";
+    cout << "4) Request data. 📊\n";
     cout << "5) Sign out. ❌\n";
     
     short option;
@@ -82,7 +83,7 @@ void Menu::display_main()
         display_delete();
         break;
     case 4:
-        display_query();
+        display_request();
         break;
     case 5:
         cout << "Thank you for your preference!\n";
@@ -92,33 +93,23 @@ void Menu::display_main()
 
 void Menu::display_create()
 {
-    cout << "---------------------------------------\n";
-    cout << "∗∗∗∗∗∗∗∗∗∗∗ Create transaction ∗∗∗∗∗∗∗∗∗∗∗\n";
-    cout << "---------------------------------------\n";
-    cout << "1) Make transfer. 🟢\n";
-    cout << "2) Deposit. 🟡\n";
-    cout << "3) Withdrawal. 🟣\n";
-    cout << "4) Go back to main menu. ⬅️\n";
+    string sender;
+    string receiver;
+    double amount;
 
-    short option;
-    do {
-        cout << "Enter an option: ";
-        cin >> option;
-    } while ( 1 > option or option > 4);
+    cout << "Amount: ";
+    cin >> amount;
+    cout << "Sender: ";
+    cin >> sender;
+    cout << "Receiver: ";
+    cin >> receiver;
 
-    switch (option)
-    {
-    case 1:
-        display_transfer();
-        break;
-    case 2:
-        break;
-    case 3:
-        break;
-    case 4:
-        display_main();
-        break;
-    }
+    // Validar datos
+    chain->insert(Transfer{amount, sender, receiver});
+    DataManager::simulate("assets/10000_transfers.csv", *chain);
+
+    pause();
+    display_main();
 }
 
 void Menu::display_update()
@@ -143,8 +134,8 @@ void Menu::display_update()
     cin >> receiver;
     
     chain->update(Transfer{amount, sender, receiver}, id_block, id_transaction);
-    cout << "\n";
 
+    pause();
     display_main();
 }
 
@@ -154,33 +145,11 @@ void Menu::display_delete()
 
 }
 
-void Menu::display_transfer()
-{
-    string sender;
-    string receiver;
-    double amount;
 
-    cout << "Amount: ";
-    cin >> amount;
-    cout << "Sender: ";
-    cin >> sender;
-    cout << "Receiver: ";
-    cin >> receiver;
-
-    // Validar datos
-    chain->insert(Transfer{amount, sender, receiver});
-    DataManager::simulate("assets/10000_transfers.csv", *chain);
-    
-    
-    // cout << *chain->block << "\n";
-    cout << "\n";
-    display_create();
-}
-
-void Menu::display_query()
+void Menu::display_request()
 {
     cout << "--------------------------------\n";
-    cout << "∗∗∗∗∗∗∗∗∗∗ Query data ∗∗∗∗∗∗∗∗∗∗\n";
+    cout << "∗∗∗∗∗∗∗∗∗ Request data ∗∗∗∗∗∗∗∗∗\n";
     cout << "--------------------------------\n";
     cout << "1) Equal to [...]\n";
     cout << "2) Range search [...]\n";
@@ -237,13 +206,16 @@ void Menu::display_equal_to()
     cout << "Member: ";
     cin >> option;
     member = option == 1 ? Member::sender : Member::receiver;
-
     cout << "Name: ";
     cin >> name;
+    cout << "\n";
 
-    cout << index->EqualTo(member, name) << "\n";
+    Transfer transfer = index->search(member, name);
+    cout << "Id block: " << transfer.id_block << "\n";
+    cout << transfer << "\n";
 
-    display_query();
+    pause();
+    display_request();
 }
 
 void Menu::display_range_search()
@@ -254,12 +226,15 @@ void Menu::display_range_search()
     cout << "End: ";
     cin >> end;
 
-    vector<Transfer*> transfers = index->RangeSearch(start, end);
+    vector<Transfer*> transfers = index->range_search(start, end);
 
-    for (auto& transfer : transfers)
+    for (auto& transfer : transfers) {
+        cout << "Id block: " << transfer->id_block << "\n"; 
         cout << *transfer << "\n";
+    }
 
-    display_query();
+    pause();
+    display_request();
 }
 
 
@@ -280,29 +255,41 @@ void Menu::display_starts_with()
 
     vector<Transfer*> transfers = index->starts_with(member, prefix);
 
-    for (auto& transfer : transfers)
+    for (auto& transfer : transfers) {
+        cout << "Id block: " << transfer->id_block << "\n"; 
         cout << *transfer << "\n";
+    }
 
-    display_query();
+    pause();
+    display_request();
 }
 
 void Menu::display_contains()
 {
-    display_query();
+    pause();
+    display_request();
 }
 
 void Menu::display_max()
 {
-    cout << index->MaxValue() << "\n";
+    Transfer transfer = index->max_value();
 
-    display_query();
+    cout << "Id block: " << transfer.id_block << "\n"; 
+    cout << transfer << "\n";
+
+    pause();
+    display_request();
 }
 
 void Menu::display_min()
 {
-    cout << index->MinValue() << "\n";
+    Transfer transfer = index->min_value();
 
-    display_query();
+    cout << "Id block: " << transfer.id_block << "\n"; 
+    cout << transfer << "\n";
+
+    pause();
+    display_request();
 }
 
 void Menu::display_ledger(){
@@ -311,8 +298,16 @@ void Menu::display_ledger(){
     cout << "∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗ 📖 Ledger 📖 ∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗\n";
     cout << "-----------------------------------------------------------------------\n";
     chain->display();
+    cout << "\n";
+    pause();
+    display_request();
+}
+
+void Menu::pause()
+{
+    cout << "Press Enter to continue...";
+    getch();
     cout << "\n\n";
-    display_query();
 }
 
 void Menu::Capybara::display()

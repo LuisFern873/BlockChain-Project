@@ -18,10 +18,9 @@ class BlockChain
 
         int size();
 
-        Block<T, N>* block;
-
     private:
         DoubleList<Block<T, N>*> chain;
+        Block<T, N>* current;
 
         void create_genesis();
 
@@ -32,23 +31,24 @@ template <typename T, size_t N>
 BlockChain<T, N>::BlockChain()
 {
     create_genesis();
-    block = new Block<T, N>();
+    current = new Block<T, N>();
+    current->id = 1;
 }
 
 template <typename T, size_t N>
 void BlockChain<T, N>::insert(T feature)
 {
-    block->insert(feature);
+    current->insert(feature);
 
-    if (!block->data.is_full())
+    if (!current->data.is_full())
         return;
     
-    block->id = chain.size();
-    block->previous_hash = chain.back()->hash;
+    current->previous_hash = chain.back()->hash;
 
-    if (block->mine()) {
-        chain.push_back(block);
-        block = new Block<T, N>();
+    if (current->mine()) {
+        chain.push_back(current);
+        current = new Block<T, N>();
+        current->id = chain.size();
     }
     else
         throw runtime_error("Block not mined");

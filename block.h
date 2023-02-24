@@ -46,6 +46,7 @@ Block<T, N>::Block()
 template <typename T, size_t N>
 void Block<T, N>::insert(T feature)
 {
+    feature.id_block = id;
     data.push_back(feature);
 }
 

@@ -144,7 +144,7 @@ vector<Transfer*> Index::starts_with(Member member, string prefix)
 
 vector<Transfer*> Index::contains(Member member, string prefix)
 {
-
+    return vector<Transfer*>();
 }
 
 Transfer Index::max_value()
