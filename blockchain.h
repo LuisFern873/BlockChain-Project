@@ -74,10 +74,11 @@ void BlockChain<T, N>::remove(size_t id)
 template <typename T, size_t N>
 void BlockChain<T, N>::display()
 {
-    auto iterator = chain.begin();
-    while(iterator != chain.end()){
+    auto iterator = --chain.end();
+    for (int i = 0; i < 10; ++i) {
         cout << **iterator << "\n";
-        ++iterator;
+        cout << " 🢁 🢃 \n\n";
+        --iterator;
     }
 }
 

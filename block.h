@@ -19,6 +19,7 @@ class Block
         bool is_valid;
 
         Block();
+        ~Block() = default;
         void insert(T feature);
         T remove(size_t index);
         int size();

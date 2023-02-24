@@ -32,8 +32,10 @@ class Menu
         void display_equal_to();
         void display_range_search();
         void display_starts_with();
+        void display_contains();
         void display_max();
         void display_min();
+        void display_ledger();
 };
 
 Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
@@ -48,9 +50,9 @@ Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
 
 void Menu::display_main()
 {
-    cout << "-----------------------------------------\n";
-    cout << "********** Welcome to CapyCoin **********\n";
-    cout << "-----------------------------------------\n";
+    cout << "------------------------------------------\n";
+    cout << "∗∗∗∗∗∗∗∗∗∗∗∗ Welcome to CapyCoin ∗∗∗∗∗∗∗∗∗∗∗∗\n";
+    cout << "------------------------------------------\n";
     Capybara::display();
     cout << "1) Create transaction. 💰\n";
     // cout << "2) Update transaction. 🖊️\n";
@@ -58,10 +60,15 @@ void Menu::display_main()
     cout << "2) Query data. 📊\n";
     cout << "3) Sign out. ❌\n";
     cout << "Enter an option: ";
-    short option;
-    cin >> option;
-    cout << "\n";
     
+    short option;
+    do {
+        cout << "Enter an option: ";
+        cin >> option;
+    } while ( 1 > option or option > 3);
+
+    cout << "\n";
+
     switch (option) 
     {
     case 1:
@@ -73,25 +80,25 @@ void Menu::display_main()
     case 3:
         cout << "Thank you for your preference!\n";
         break;
-    default:
-        cout << "Enter a valid option.\n";
-        display_main();
-        break;
     }
 }
 
 void Menu::display_create()
 {
-    cout << "----------------------------------------\n";
-    cout << "********** Create transaction ********** \n";
-    cout << "----------------------------------------\n";
+    cout << "---------------------------------------\n";
+    cout << "∗∗∗∗∗∗∗∗∗∗∗ Create transaction ∗∗∗∗∗∗∗∗∗∗∗\n";
+    cout << "---------------------------------------\n";
     cout << "1) Make transfer. 🟢\n";
     cout << "2) Deposit. 🟡\n";
     cout << "3) Withdrawal. 🟣\n";
     cout << "4) Go back to main menu. ⬅️\n";
-    cout << "Enter an option: ";
+
     short option;
-    cin >> option;
+    do {
+        cout << "Enter an option: ";
+        cin >> option;
+    } while ( 1 > option or option > 4);
+
     switch (option)
     {
     case 1:
@@ -103,8 +110,6 @@ void Menu::display_create()
         break;
     case 4:
         display_main();
-        break;
-    default:
         break;
     }
 }
@@ -134,7 +139,7 @@ void Menu::display_transfer()
 void Menu::display_query()
 {
     cout << "--------------------------------\n";
-    cout << "********** Query data **********\n";
+    cout << "∗∗∗∗∗∗∗∗∗∗ Query data ∗∗∗∗∗∗∗∗∗∗\n";
     cout << "--------------------------------\n";
     cout << "1) Equal to [...]\n";
     cout << "2) Range search [...]\n";
@@ -163,6 +168,7 @@ void Menu::display_query()
         display_starts_with();
         break;
     case 4:
+        display_contains();
         break;
     case 5:
         display_max();
@@ -171,8 +177,7 @@ void Menu::display_query()
         display_min();
         break;
     case 7:
-        chain->display();
-        display_query();
+        display_ledger();
         break;
     case 8:
         display_main();
@@ -240,6 +245,11 @@ void Menu::display_starts_with()
     display_query();
 }
 
+void Menu::display_contains()
+{
+    display_query();
+}
+
 void Menu::display_max()
 {
     cout << index->MaxValue() << "\n";
@@ -251,6 +261,16 @@ void Menu::display_min()
 {
     cout << index->MinValue() << "\n";
 
+    display_query();
+}
+
+void Menu::display_ledger(){
+    cout << "\n";
+    cout << "-----------------------------------------------------------------------\n";
+    cout << "∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗ 📖 Ledger 📖 ∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗\n";
+    cout << "-----------------------------------------------------------------------\n";
+    chain->display();
+    cout << "\n\n";
     display_query();
 }
 

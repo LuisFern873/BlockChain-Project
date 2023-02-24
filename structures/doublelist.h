@@ -327,7 +327,9 @@ DoubleList<T>::iterator DoubleList<T>::begin()
 template <typename T>
 DoubleList<T>::iterator DoubleList<T>::end()
 {
-    return DoubleList<T>::iterator(tail->next);
+    Node<T>* temporal = new Node<T>();
+    temporal->prev = tail;
+    return DoubleList<T>::iterator(temporal);
 }
 
 
