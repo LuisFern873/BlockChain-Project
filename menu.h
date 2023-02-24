@@ -31,6 +31,7 @@ class Menu
         // Query menus :)
         void display_equal_to();
         void display_range_search();
+        void display_starts_with();
         void display_max();
         void display_min();
 };
@@ -137,15 +138,18 @@ void Menu::display_query()
     cout << "--------------------------------\n";
     cout << "1) Equal to [...]\n";
     cout << "2) Range search [...]\n";
-    cout << "3) Start with [...]\n";
+    cout << "3) Starts with [...]\n";
     cout << "4) Contains [...]\n";
     cout << "5) Max value [...]\n";
     cout << "6) Min value [...]\n";
     cout << "7) Ledger [...]\n";
     cout << "8) Go back to main menu ⬅️\n";
-    cout << "Enter an option: ";
+
     short option;
-    cin >> option;
+    do {
+        cout << "Enter an option: ";
+        cin >> option;
+    } while ( 1 > option or option > 8);
 
     switch (option)
     {
@@ -156,6 +160,7 @@ void Menu::display_query()
         display_range_search();
         break;
     case 3:
+        display_starts_with();
         break;
     case 4:
         break;
@@ -171,10 +176,6 @@ void Menu::display_query()
         break;
     case 8:
         display_main();
-        break;
-    default:
-        cout << "Enter a valid option!\n";
-        display_query();
         break;
     }
 }
@@ -208,6 +209,30 @@ void Menu::display_range_search()
     cin >> end;
 
     vector<Transfer*> transfers = index->RangeSearch(start, end);
+
+    for (auto& transfer : transfers)
+        cout << *transfer << "\n";
+
+    display_query();
+}
+
+
+void Menu::display_starts_with()
+{
+    string prefix;
+    Member member;
+    short option;
+
+    cout << "1) Sender\n";
+    cout << "2) Receiver\n";
+    cout << "Member: ";
+    cin >> option;
+    member = option == 1 ? Member::sender : Member::receiver;
+
+    cout << "Prefix: ";
+    cin >> prefix;
+
+    vector<Transfer*> transfers = index->starts_with(member, prefix);
 
     for (auto& transfer : transfers)
         cout << *transfer << "\n";

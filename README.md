@@ -19,7 +19,7 @@ Blockchain es una tecnología que ha impulsado el comercio de criptomonedas debi
 
 Para resguardar la integridad de los datos, la inserción de cada bloque a la Blockchain requiere que este se encuentre minado.
 
-A cada bloque se le asigna un código hash de acuerdo a su contenido (historial de transacciones) y el nonce haciendo uso del algoritmo criptográfico Sha256.
+A cada bloque se le asigna un código hash de acuerdo a su contenido (historial de transacciones) y el nonce haciendo uso del algoritmo criptográfico sha256, como se ilustra en la imagen:
 
 
 ![](assets/hash.png "Sha256")
@@ -57,6 +57,10 @@ bool Block<T, N>::mine()
 ```
 
 ## 5. Estructuras de datos de indexación y consultas
+
+Para la consulta de datos eficiente de la Blockchain, las transacciones han sido indexadas con distintas estructuras de datos como se muestra en la imagen:
+![](assets/schema.png "Schema")
+
 
 ### EqualTo
 Para esta consulta se utilizó un de `ChainHash` implementado con array de `ForwardList`.

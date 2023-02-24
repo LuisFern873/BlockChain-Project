@@ -6,16 +6,6 @@
 using namespace std;
 
 template <typename T>
-struct Node 
-{
-    T data{};
-    Node<T>* next;
-
-    Node();
-    Node(T value);   
-};
-
-template <typename T>
 class ForwardList
 {
     public:
@@ -37,25 +27,34 @@ class ForwardList
         void display(ostream& os);
 
     private:
-        Node<T>* head;
+        struct Node 
+        {
+            T data{};
+            Node* next;
+
+            Node();
+            Node(T value);   
+        };
+
+        Node* head;
         int nodes;
 
-        Node<T>* get_tail();
-        Node<T>* prev(Node<T>* node);
-        Node<T>* get_node(int pos);
-        Node<T>* get_middle(Node<T>* start);
+        Node* get_tail();
+        Node* prev(Node* node);
+        Node* get_node(int pos);
+        Node* get_middle(Node* start);
 };
 
 // Node implementation
 
 template <typename T>
-Node<T>::Node()
+ForwardList<T>::Node::Node()
 {
     next = nullptr;
 }
 
 template <typename T>
-Node<T>::Node(T value)
+ForwardList<T>::Node::Node(T value)
 { 
     data = value;
     next = nullptr;
@@ -97,7 +96,7 @@ T& ForwardList<T>::back()
 template <typename T>
 void ForwardList<T>::push_front(T data)
 {
-    auto node = new Node<T>(data);
+    auto node = new Node(data);
     node->next = head;
     head = node;
     ++nodes;
@@ -108,7 +107,7 @@ void ForwardList<T>::push_back(T data)
 {
     if(is_empty()) push_front(data);
     else {
-        auto node = new Node<T>(data);
+        auto node = new Node(data);
         auto tail = get_tail();
         tail->next = node;
         ++nodes;
@@ -153,7 +152,7 @@ void ForwardList<T>::insert(T data, int pos)
     if (pos < 0 or nodes <= pos)
         throw runtime_error("Forward list index out of range");
 
-    auto node = new Node<T>(data);
+    auto node = new Node(data);
     auto prev_node = get_node(pos - 1);
     auto next_node = get_node(pos);
 
@@ -223,7 +222,7 @@ void ForwardList<T>::display(ostream& os)
 }
 
 template <typename T>
-Node<T>* ForwardList<T>::get_tail()
+ForwardList<T>::Node* ForwardList<T>::get_tail()
 {
     auto tail = head;
     while(tail->next){
@@ -233,7 +232,7 @@ Node<T>* ForwardList<T>::get_tail()
 }
 
 template <typename T>
-Node<T>* ForwardList<T>::prev(Node<T>* node)
+ForwardList<T>::Node* ForwardList<T>::prev(Node* node)
 {
     auto current = head;
     while(current->next != node){
@@ -243,7 +242,7 @@ Node<T>* ForwardList<T>::prev(Node<T>* node)
 }
 
 template <typename T>
-Node<T>* ForwardList<T>::get_node(int pos)
+ForwardList<T>::Node* ForwardList<T>::get_node(int pos)
 {
     auto node = head;
     while(pos--){
@@ -253,7 +252,7 @@ Node<T>* ForwardList<T>::get_node(int pos)
 }
 
 template <typename T>
-Node<T>* ForwardList<T>::get_middle(Node<T>* start){
+ForwardList<T>::Node* ForwardList<T>::get_middle(Node* start){
     auto slow = start;
     auto fast = start->next;
     while (fast and fast->next){

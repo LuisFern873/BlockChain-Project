@@ -5,6 +5,7 @@
 # include "blockchain.h"
 # include "structures/chainhash.h"
 # include "structures/b+tree.h"
+# include "structures/trie.h"
 # include "record.h"
 
 using namespace std;
@@ -56,6 +57,49 @@ struct Index
         }
     }
 
+    void create_trie_index(BlockChain<Transfer>& blockchain)
+    {
+        string sender;
+        string receiver;
+        Transfer* ptr;
+
+        for (int i = 1; i < blockchain.size(); ++i)
+        {
+            auto block = blockchain.chain[i];
+
+            for (int i = 0; i < block->size(); ++i) 
+            {
+                sender = block->data[i].get_sender();
+                receiver = block->data[i].get_receiver();
+                ptr = &block->data[i];
+
+                start_sender_index.insert(sender, ptr);
+                start_receiver_index.insert(receiver, ptr);
+            }
+        }
+    }
+
+    vector<Transfer*> starts_with(Member member, string prefix)
+    {
+        static auto get_sender = [](Transfer* transfer) { 
+            return transfer->get_sender(); 
+        };
+
+        static auto get_receiver = [](Transfer* transfer) { 
+            return transfer->get_receiver(); 
+        };
+
+        switch (member)
+        {
+        case Member::sender:
+            return start_sender_index.starts_with(prefix, get_sender);
+        case Member::receiver:
+            return start_receiver_index.starts_with(prefix, get_receiver);
+        default:
+            throw invalid_argument("Invalid block attribute");
+        }
+    } 
+
     Transfer EqualTo(Member member, string key)
     {
         switch (member)
@@ -65,7 +109,7 @@ struct Index
         case Member::receiver:
             return *receiver_index.find(key);
         default:
-            throw runtime_error("Requested data was not found");
+            throw invalid_argument("Invalid block attribute");
         }
     }
 
@@ -84,10 +128,13 @@ struct Index
         return amount_index.rangeSearch(start, end);
     }
 
+
+
     BPlusTree<double, Transfer*> amount_index;
     ChainHash<string, Transfer*> sender_index;
     ChainHash<string, Transfer*> receiver_index;
+    Trie<Transfer*> start_sender_index;
+    Trie<Transfer*> start_receiver_index;
 };
-
 
 # endif // INDEX_H

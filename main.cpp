@@ -13,6 +13,7 @@ int main()
 
     index.create_hash_index(chain);
     index.create_BPlusTree_index(chain);
+    index.create_trie_index(chain);
 
     auto menu = Menu::init(chain, index);
     menu->display_main();
