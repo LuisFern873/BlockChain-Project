@@ -12,12 +12,13 @@ using namespace std;
 
 enum class Member { sender, receiver };
 
+// template <typename T, size_t N>
 class Index
 {
     public:
-        void create_hash_index(); // search O(1)
-        void create_tree_index(); // max_value and min_value O(logn), range_search O(t*log(t*n)), t = 5
-        void create_trie_index(); // starts_with O(m)
+        void create_index(Block<Transfer, 5>* block);
+        void remove_index(Block<Transfer, 5>* block);
+        void update_index(Block<Transfer, 5>* block);
 
         Transfer search(Member member, string key);
         vector<Transfer*> range_search(double start, double end);
@@ -26,81 +27,49 @@ class Index
         Transfer max_value();
         Transfer min_value();
 
-        Index(BlockChain<Transfer>& Blockchain) : blockchain(&Blockchain) {}
+        Index() = default;
 
     private:
-        BlockChain<Transfer>* blockchain;
-
-        BPlusTree<double, Transfer*> amount_index;
         ChainHash<string, Transfer*> sender_index;
         ChainHash<string, Transfer*> receiver_index;
-        Trie<Transfer*> start_sender_index;
-        Trie<Transfer*> start_receiver_index;
+        BPlusTree<double, Transfer*> amount_index;
+        Trie<Transfer*> prefix_sender_index;
+        Trie<Transfer*> prefix_receiver_index;
 };
 
-
-void Index::create_hash_index()
+void Index::create_index(Block<Transfer, 5>* block)
 {
     string sender;
     string receiver;
-    Transfer* ptr;
-
-    for (int i = 1; i < blockchain->size(); ++i)
-    {
-        auto block = blockchain->chain[i];
-
-        for (int i = 0; i < block->size(); ++i) 
-        {
-            sender = block->data[i].get_sender();
-            receiver = block->data[i].get_receiver();
-            ptr = &block->data[i];
-
-            sender_index.insert(sender, ptr);
-            receiver_index.insert(receiver, ptr);
-        }
-    }
-}
-
-void Index::create_tree_index()
-{
     double amount;
     Transfer* ptr;
 
-    for (int i = 1; i < blockchain->size(); ++i)
+    for (int i = 0; i < block->size(); ++i) 
     {
-        auto block = blockchain->chain[i];
+        sender = block->data[i].get_sender();
+        receiver = block->data[i].get_receiver();
+        amount = block->data[i].get_amount();
+        ptr = &block->data[i];
 
-        for (int i = 0; i < block->size(); ++i) 
-        {
-            amount = block->data[i].get_amount();
-            ptr = &block->data[i];
-
-            amount_index.insert(amount, ptr);
-        }
+        // Hash index
+        sender_index.insert(sender, ptr);
+        receiver_index.insert(receiver, ptr);
+        // B+ tree index
+        amount_index.insert(amount, ptr);
+        // Prefix tree index
+        prefix_sender_index.insert(sender, ptr);
+        prefix_receiver_index.insert(receiver, ptr);
     }
 }
 
-
-void Index::create_trie_index()
+void Index::remove_index(Block<Transfer, 5>* block)
 {
-    string sender;
-    string receiver;
-    Transfer* ptr;
 
-    for (int i = 1; i < blockchain->size(); ++i)
-    {
-        auto block = blockchain->chain[i];
+}
 
-        for (int i = 0; i < block->size(); ++i) 
-        {
-            sender = block->data[i].get_sender();
-            receiver = block->data[i].get_receiver();
-            ptr = &block->data[i];
+void Index::update_index(Block<Transfer, 5>* block)
+{
 
-            start_sender_index.insert(sender, ptr);
-            start_receiver_index.insert(receiver, ptr);
-        }
-    }
 }
 
 Transfer Index::search(Member member, string key)
@@ -134,9 +103,9 @@ vector<Transfer*> Index::starts_with(Member member, string prefix)
     switch (member)
     {
     case Member::sender:
-        return start_sender_index.starts_with(prefix, get_sender);
+        return prefix_sender_index.starts_with(prefix, get_sender);
     case Member::receiver:
-        return start_receiver_index.starts_with(prefix, get_receiver);
+        return prefix_receiver_index.starts_with(prefix, get_receiver);
     default:
         throw invalid_argument("Invalid block attribute");
     }

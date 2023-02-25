@@ -53,7 +53,7 @@ public:
             node = node->children[c];
         }
         for (TV value : node->values) {
-            if (get_prefix(value).substr(0, prefix.size()) == prefix) {
+            if (get_prefix(value).substr(0, prefix.size()) == prefix) { // Apply Boyer Moore algorithm instead
                 report.push_back(value);
             }
         }
@@ -62,7 +62,6 @@ public:
 
 private:
     TrieNode<TV>* root;
-    // Assumes that TV has a method get_word() that returns a string
 
 };
 

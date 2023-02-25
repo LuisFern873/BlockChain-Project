@@ -42,7 +42,7 @@ void DataManager::load(string filename, BlockChain<Transfer>& chain)
 
 void DataManager::simulate(string filename, BlockChain<Transfer>& chain)
 {
-    cout << "Waiting other transfers to mine block...\n";
+    cout << "Waiting for other transfers to mine block...\n";
     string line;
     ifstream file(filename);
 

@@ -11,7 +11,7 @@ using namespace std;
 class Menu
 {
     public:
-        static Menu* init(BlockChain<Transfer>& chain, Index& index);
+        static Menu* init(BlockChain<Transfer>& chain);
         void display_main();
 
     private:
@@ -41,12 +41,12 @@ class Menu
         void pause();
 };
 
-Menu* Menu::init(BlockChain<Transfer>& Chain, Index& Index)
+Menu* Menu::init(BlockChain<Transfer>& Chain)
 {
     if (menu == nullptr) {
         menu = new Menu();
         chain = &Chain;
-        index = &Index;
+        index = Chain.index;
     }
     return menu;
 }

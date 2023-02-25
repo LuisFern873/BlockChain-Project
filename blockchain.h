@@ -1,8 +1,9 @@
 # ifndef BLOCK_CHAIN_H
 # define BLOCK_CHAIN_H
 
-# include "block.h"
 # include "record.h"
+# include "block.h"
+# include "index.h"
 # include "structures/doublelist.h"
 
 template <typename T, size_t N = 5>
@@ -14,17 +15,15 @@ class BlockChain
         void update(T new_feature, size_t id_block, size_t id_feature);
         void remove(size_t id_block, size_t id_feature);
         void display();
-
-
         int size();
+
+        Index* index;
 
     private:
         DoubleList<Block<T, N>*> chain;
         Block<T, N>* current;
 
         void create_genesis();
-
-    friend class Index;
 };
 
 template <typename T, size_t N>
@@ -33,6 +32,7 @@ BlockChain<T, N>::BlockChain()
     create_genesis();
     current = new Block<T, N>();
     current->id = 1;
+    index = new Index();
 }
 
 template <typename T, size_t N>
@@ -47,14 +47,13 @@ void BlockChain<T, N>::insert(T feature)
 
     if (current->mine()) {
         chain.push_back(current);
-        current = new Block<T, N>();
-        current->id = chain.size();
+        index->create_index(current);
     }
     else
         throw runtime_error("Block not mined");
 
-    // update index
-    // Index::update();
+    current = new Block<T, N>();
+    current->id = chain.size();
 }
 
 template <typename T, size_t N>
