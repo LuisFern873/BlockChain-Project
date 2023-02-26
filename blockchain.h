@@ -83,6 +83,9 @@ template <typename T, size_t N>
 void BlockChain<T, N>::remove(size_t id_block, size_t id_feature)
 {
     // Just remove from index
+    Block<T, N>* block = chain[id_block];
+
+    index->remove_index(block, id_feature);
 }
 
 template <typename T, size_t N>

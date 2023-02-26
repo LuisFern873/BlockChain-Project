@@ -86,8 +86,7 @@ TV ChainHash<TK,TV>::find(TK key)
 		if(chain[i].key == key)
 			return chain[i].value;
 	}
-	cout << "Key not found.\n"; 
-	return TV();
+	throw out_of_range("Key not found.");
 }
 
 template <typename TK, typename TV>
@@ -97,8 +96,10 @@ void ChainHash<TK,TV>::remove(TK key)
 	auto& chain = array[index];
 
 	for(int i = 0; i < chain.size(); ++i){
-		if(chain[i].key == key)
+		if(chain[i].key == key) {
 			chain.remove(i);
+			return;
+		}
 	}
 	cout << "Key not found.\n"; 
 }

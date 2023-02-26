@@ -30,7 +30,7 @@ class Menu
         void display_request();
 
         // Query menus :)
-        void display_equal_to();
+        void display_search();
         void display_range_search();
         void display_starts_with();
         void display_contains();
@@ -142,7 +142,19 @@ void Menu::display_update()
 
 void Menu::display_delete()
 {
+    size_t id_block;
+    size_t id_transaction;
+    cout << "Id block: ";
+    cin >> id_block;
+    cout << "Id transaction: ";
+    cin >> id_transaction;
+    
+    chain->remove(id_block, id_transaction);
 
+    
+
+    pause();
+    display_main();
 }
 
 
@@ -151,7 +163,7 @@ void Menu::display_request()
     cout << "--------------------------------\n";
     cout << "∗∗∗∗∗∗∗∗∗ Request data ∗∗∗∗∗∗∗∗∗\n";
     cout << "--------------------------------\n";
-    cout << "1) Equal to [...]\n";
+    cout << "1) Search [...]\n";
     cout << "2) Range search [...]\n";
     cout << "3) Starts with [...]\n";
     cout << "4) Contains [...]\n";
@@ -169,7 +181,7 @@ void Menu::display_request()
     switch (option)
     {
     case 1:
-        display_equal_to();
+        display_search();
         break;
     case 2:
         display_range_search();
@@ -195,7 +207,7 @@ void Menu::display_request()
     }
 }
 
-void Menu::display_equal_to()
+void Menu::display_search()
 {
     string name;
     Member member;

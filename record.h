@@ -10,6 +10,7 @@ class BankAccount
     private:
         double balance;
         string user;
+        string password;
 };
 
 class Record

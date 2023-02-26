@@ -17,8 +17,8 @@ class Index
 {
     public:
         void create_index(Block<Transfer, 5>* block);
-        void remove_index(Block<Transfer, 5>* block);
-        void update_index(Block<Transfer, 5>* block);
+        void remove_index(Block<Transfer, 5>* block, size_t id_feacture);
+        void update_index(Block<Transfer, 5>* block, size_t id_feacture);
 
         Transfer search(Member member, string key);
         vector<Transfer*> range_search(double start, double end);
@@ -28,6 +28,7 @@ class Index
         Transfer min_value();
 
         Index() = default;
+        ~Index() = default;
 
     private:
         ChainHash<string, Transfer*> sender_index;
@@ -62,14 +63,34 @@ void Index::create_index(Block<Transfer, 5>* block)
     }
 }
 
-void Index::remove_index(Block<Transfer, 5>* block)
+void Index::remove_index(Block<Transfer, 5>* block, size_t id_feacture)
 {
+    Transfer transfer = block->data[id_feacture];
+    string sender = transfer.get_sender();
+    string receiver = transfer.get_receiver();
+    double amount = transfer.get_amount();
 
+    // Hash index
+    sender_index.remove(sender);
+    receiver_index.remove(receiver);
+    // B+ tree index
+    amount_index.remove(amount);
+    // Prefix tree index
+    prefix_sender_index.remove(sender);
+    prefix_receiver_index.remove(receiver);
+
+    cout << "The following transfer has been removed successfully from the index. ✅\n";
+    cout << transfer << "\n";
 }
 
-void Index::update_index(Block<Transfer, 5>* block)
+void Index::update_index(Block<Transfer, 5>* block, size_t id_feacture)
 {
+    Transfer transfer = block->data[id_feacture];
+    string sender = transfer.get_sender();
+    string receiver = transfer.get_receiver();
+    double amount = transfer.get_amount();
 
+    
 }
 
 Transfer Index::search(Member member, string key)
