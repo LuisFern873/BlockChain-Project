@@ -6,7 +6,7 @@
 # include "structures/chainhash.h"
 # include "structures/b+tree.h"
 # include "structures/trie.h"
-# include "record.h"
+# include "structures/forwardlist.h"
 
 using namespace std;
 
@@ -32,62 +32,32 @@ class Index
         ~Index() = default;
 
     private:
-        ChainHash<string, T*> sender_index;
-        ChainHash<string, T*> receiver_index;
         BPlusTree<double, T*> amount_index;
-        Trie<T*> prefix_sender_index;
-        Trie<T*> prefix_receiver_index;
+        ChainHash<string, T*> sender_index, receiver_index;
+        Trie<T*> prefix_sender_index, prefix_receiver_index;
+        ForwardList<pair<string, T*>> senders, receivers;
+        bool boyer_moore(string text, string pattern);
 };
 
 template <typename T>
-void Index<T>::create_index(Block<T, 5>* block)
+void Index<T>::create_index(Block<T>* block)
 {
     T* pointer;
-    string sender;
-    string receiver;
-    double amount;
-
-    for (int i = 0; i < block->size(); ++i) 
-    {
+    for (int i = 0; i < block->size(); ++i) {
         pointer = &block->data[i];
-        sender = pointer->get_sender();
-        receiver = pointer->get_receiver();
-        amount = pointer->get_amount();
-
-        // Hash index
-        sender_index.insert(sender, pointer);
-        receiver_index.insert(receiver, pointer);
-        // B+ tree index
-        amount_index.insert(amount, pointer);
-        // Prefix tree index
-        prefix_sender_index.insert(sender, pointer);
-        prefix_receiver_index.insert(receiver, pointer);
+        create_index(pointer);
     }
 }
 
 template <typename T>
-void Index<T>::remove_index(Block<T, 5>* block)
+void Index<T>::remove_index(Block<T>* block)
 {
     T* pointer;
-    string sender;
-    string receiver;
-    double amount;
 
     for (int i = 0; i < block->size(); ++i) 
     {
         pointer = &block->data[i];
-        sender = pointer->get_sender();
-        receiver = pointer->get_receiver();
-        amount = pointer->get_amount();
-
-        // Hash index
-        sender_index.remove(sender);
-        receiver_index.remove(receiver);
-        // B+ tree index
-        amount_index.remove(amount);
-        // Prefix tree index
-        prefix_sender_index.remove(sender);
-        prefix_receiver_index.remove(receiver);
+        remove_index(pointer);
     }
 }
 
@@ -106,6 +76,9 @@ void Index<T>::create_index(T* transfer)
     // Prefix tree index
     prefix_sender_index.insert(sender, transfer);
     prefix_receiver_index.insert(receiver, transfer);
+    // For pattern searching
+    senders.push_back({sender, transfer});
+    receivers.push_back({receiver, transfer});
 }
 
 template <typename T>
@@ -123,6 +96,21 @@ void Index<T>::remove_index(T* transfer)
     // Prefix tree index
     prefix_sender_index.remove(sender);
     prefix_receiver_index.remove(receiver);
+    // For pattern searching
+    for (int i = 0; i < senders.size(); ++i) {
+        auto [name, pointer] = senders[i];
+        if (name == sender) {
+            senders.remove(i);
+            break;
+        }
+    }
+    for (int i = 0; i < receivers.size(); ++i) {
+        auto [name, pointer] = receivers[i];
+        if (name == receiver) {
+            receivers.remove(i);
+            break;
+        }
+    }
 }
 
 template <typename T>
@@ -156,21 +144,23 @@ vector<T*> Index<T>::starts_with(Member member, string prefix)
         return transfer->get_receiver(); 
     };
 
-    switch (member)
-    {
-    case Member::sender:
-        return prefix_sender_index.starts_with(prefix, get_sender);
-    case Member::receiver:
-        return prefix_receiver_index.starts_with(prefix, get_receiver);
-    default:
-        throw invalid_argument("Invalid block attribute");
-    }
+    return member == Member::sender ? 
+        prefix_sender_index.starts_with(prefix, get_sender) : 
+        prefix_receiver_index.starts_with(prefix, get_receiver);
 }
 
 template <typename T>
-vector<T*> Index<T>::contains(Member member, string prefix)
+vector<T*> Index<T>::contains(Member member, string pattern)
 {
-    return vector<T*>();
+    vector<T*> report;
+    auto list = member == Member::sender ? &senders : &receivers;
+    for (int i = 0; i < list->size(); ++i) {
+        auto [attribute, pointer] = (*list)[i];
+        if (boyer_moore(attribute, pattern)) {
+            report.push_back(pointer);
+        }
+    }
+    return report;
 }
 
 template <typename T>
@@ -185,6 +175,48 @@ T Index<T>::min_value()
     return *amount_index.min();
 }
 
+template <typename T>
+bool Index<T>::boyer_moore(string text, string pattern) 
+{
+    vector<int> positions;
+
+    int n = text.size();
+    int m = pattern.size();
+
+    if (m > n) {
+        return false;
+    }
+
+    vector<int> badChar(256, -1);
+    for (int i = 0; i < m; i++) {
+        badChar[(int)pattern[i]] = i;
+    }
+
+    vector<int> suffix(m);
+    int j = m;
+    for (int i = m - 1; i >= 0; i--) {
+        while (j < m && pattern[i] != pattern[j - 1]) {
+            j = suffix[j];
+        }
+        suffix[i] = --j;
+    }
+
+    int i = 0;
+    while (i <= n - m) {
+        int j = m - 1;
+        while (j >= 0 && pattern[j] == text[i + j]) {
+            j--;
+        }
+        if (j < 0) {
+            positions.push_back(i);
+            i += (i + m < n) ? m - badChar[(int)text[i + m]] : 1;
+        } else {
+            i += max(1, j - suffix[j]);
+        }
+    }
+
+    return !positions.empty();
+}
 
 
 # endif // INDEX_H

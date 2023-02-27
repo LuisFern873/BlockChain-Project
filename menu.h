@@ -3,27 +3,28 @@
 
 # include <iostream>
 # include <conio.h>
-# include "blockchain.h"
 # include "index.h"
 
 using namespace std;
 
+template <typename T>
 class Menu
 {
     public:
-        static Menu* init(BlockChain<Transfer>& chain);
+        static Menu* init(BlockChain<T>& chain);
         void display_main();
 
     private:
         inline static Menu* menu = nullptr;
-        inline static BlockChain<Transfer>* chain;
-        inline static Index<Transfer>* index;
+        inline static BlockChain<T>* chain;
+        inline static Index<T>* index;
 
         Menu() = default;
         struct Capybara {
             static void display();
         };
 
+        // Secondary menus :)
         void display_create();
         void display_update();
         void display_delete();
@@ -41,7 +42,8 @@ class Menu
         void pause();
 };
 
-Menu* Menu::init(BlockChain<Transfer>& Chain)
+template <typename T>
+Menu<T>* Menu<T>::init(BlockChain<T>& Chain)
 {
     if (menu == nullptr) {
         menu = new Menu();
@@ -51,7 +53,8 @@ Menu* Menu::init(BlockChain<Transfer>& Chain)
     return menu;
 }
 
-void Menu::display_main()
+template <typename T>
+void Menu<T>::display_main()
 {
     cout << "---------------------------------------------\n";
     cout << "∗∗∗∗∗∗∗∗∗∗∗∗ Welcome to CapyCoin ∗∗∗∗∗∗∗∗∗∗∗∗\n";
@@ -91,7 +94,8 @@ void Menu::display_main()
     }
 }
 
-void Menu::display_create()
+template <typename T>
+void Menu<T>::display_create()
 {
     string sender;
     string receiver;
@@ -105,14 +109,15 @@ void Menu::display_create()
     cin >> receiver;
 
     // Validar datos
-    chain->insert(Transfer{amount, sender, receiver});
+    chain->insert(T{amount, sender, receiver});
     DataManager::simulate("assets/10000_transfers.csv", *chain);
 
     pause();
     display_main();
 }
 
-void Menu::display_update()
+template <typename T>
+void Menu<T>::display_update()
 {
     int id_block;
     int id_transaction;
@@ -120,8 +125,6 @@ void Menu::display_update()
     cin >> id_block;
     cout << "Id transaction: ";
     cin >> id_transaction;
-
-    // cout << (*chain)[id_block];
 
     string sender;
     string receiver;
@@ -133,14 +136,14 @@ void Menu::display_update()
     cout << "New receiver: ";
     cin >> receiver;
     
-    chain->update(Transfer{amount, sender, receiver}, id_block, id_transaction);
+    chain->update(T{amount, sender, receiver}, id_block, id_transaction);
 
     pause();
     display_main();
 }
 
-
-void Menu::display_delete()
+template <typename T>
+void Menu<T>::display_delete()
 {
     int id_block;
     int id_transaction;
@@ -151,14 +154,12 @@ void Menu::display_delete()
     
     chain->remove(id_block, id_transaction);
 
-    
-
     pause();
     display_main();
 }
 
-
-void Menu::display_request()
+template <typename T>
+void Menu<T>::display_request()
 {
     cout << "--------------------------------\n";
     cout << "∗∗∗∗∗∗∗∗∗ Request data ∗∗∗∗∗∗∗∗∗\n";
@@ -207,7 +208,8 @@ void Menu::display_request()
     }
 }
 
-void Menu::display_search()
+template <typename T>
+void Menu<T>::display_search()
 {
     string name;
     Member member;
@@ -222,7 +224,7 @@ void Menu::display_search()
     cin >> name;
     cout << "\n";
 
-    Transfer transfer = index->search(member, name);
+    T transfer = index->search(member, name);
     cout << "Id block: " << transfer.id_block << "\n";
     cout << transfer << "\n";
 
@@ -230,7 +232,8 @@ void Menu::display_search()
     display_request();
 }
 
-void Menu::display_range_search()
+template <typename T>
+void Menu<T>::display_range_search()
 {
     double start, end;
     cout << "Start: ";
@@ -238,7 +241,7 @@ void Menu::display_range_search()
     cout << "End: ";
     cin >> end;
 
-    vector<Transfer*> transfers = index->range_search(start, end);
+    vector<T*> transfers = index->range_search(start, end);
 
     for (auto& transfer : transfers) {
         cout << "Id block: " << transfer->id_block << "\n"; 
@@ -249,8 +252,8 @@ void Menu::display_range_search()
     display_request();
 }
 
-
-void Menu::display_starts_with()
+template <typename T>
+void Menu<T>::display_starts_with()
 {
     string prefix;
     Member member;
@@ -265,7 +268,7 @@ void Menu::display_starts_with()
     cout << "Prefix: ";
     cin >> prefix;
 
-    vector<Transfer*> transfers = index->starts_with(member, prefix);
+    vector<T*> transfers = index->starts_with(member, prefix);
 
     for (auto& transfer : transfers) {
         cout << "Id block: " << transfer->id_block << "\n"; 
@@ -276,15 +279,37 @@ void Menu::display_starts_with()
     display_request();
 }
 
-void Menu::display_contains()
+template <typename T>
+void Menu<T>::display_contains()
 {
+    string pattern;
+    Member member;
+    short option;
+
+    cout << "1) Sender\n";
+    cout << "2) Receiver\n";
+    cout << "Member: ";
+    cin >> option;
+    member = option == 1 ? Member::sender : Member::receiver;
+
+    cout << "Pattern: ";
+    cin >> pattern;
+
+    vector<T*> transfers = index->contains(member, pattern);
+
+    for (auto& transfer : transfers) {
+        cout << "Id block: " << transfer->id_block << "\n"; 
+        cout << *transfer << "\n";
+    }
+
     pause();
     display_request();
 }
 
-void Menu::display_max()
+template <typename T>
+void Menu<T>::display_max()
 {
-    Transfer transfer = index->max_value();
+    T transfer = index->max_value();
 
     cout << "Id block: " << transfer.id_block << "\n"; 
     cout << transfer << "\n";
@@ -293,9 +318,10 @@ void Menu::display_max()
     display_request();
 }
 
-void Menu::display_min()
+template <typename T>
+void Menu<T>::display_min()
 {
-    Transfer transfer = index->min_value();
+    T transfer = index->min_value();
 
     cout << "Id block: " << transfer.id_block << "\n"; 
     cout << transfer << "\n";
@@ -304,7 +330,8 @@ void Menu::display_min()
     display_request();
 }
 
-void Menu::display_ledger(){
+template <typename T>
+void Menu<T>::display_ledger(){
     cout << "\n";
     cout << "-----------------------------------------------------------------------\n";
     cout << "∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗ 📖 Ledger 📖 ∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗∗\n";
@@ -315,14 +342,16 @@ void Menu::display_ledger(){
     display_request();
 }
 
-void Menu::pause()
+template <typename T>
+void Menu<T>::pause()
 {
     cout << "Press Enter to continue...";
     getch();
     cout << "\n\n";
 }
 
-void Menu::Capybara::display()
+template <typename T>
+void Menu<T>::Capybara::display()
 {
     cout << "⠀⠀⢀⣀⠤⠿⢤⢖⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n";
     cout << "⡔⢩⠂⠀⠒⠗⠈⠀⠉⠢⠄⣀⠠⠤⠄⠒⢖⡒⢒⠂⠤⢄⠀⠀⠀⠀\n";

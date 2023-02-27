@@ -16,11 +16,13 @@ class BlockChain
         void remove(int id_block, int id_transfer);
         void display();
         int size();
+
         Index<T>* index;
 
     private:
         DoubleList<Block<T>*> chain;
         Block<T>* current;
+        
         void create_genesis();
 };
 
@@ -64,7 +66,7 @@ void BlockChain<T>::update(T new_transfer, int id_block, int id_transfer)
         ++iterator;
 
     // O(N) + O(1): find transfer and replace transfer
-    Transfer* transfer = &(*iterator)->data[id_transfer];
+    T* transfer = &(*iterator)->data[id_transfer];
     index->remove_index(transfer);
     *transfer = new_transfer;
     index->create_index(&new_transfer);
@@ -85,7 +87,7 @@ void BlockChain<T>::update(T new_transfer, int id_block, int id_transfer)
 template <typename T>
 void BlockChain<T>::remove(int id_block, int id_transfer)
 {
-    Transfer* transfer = &chain[id_block]->data[id_transfer];
+    T* transfer = &chain[id_block]->data[id_transfer];
     index->remove_index(transfer);
     cout << "The following transfer has been removed successfully from the index. ✅\n";
     cout << *transfer << "\n";

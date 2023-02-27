@@ -18,9 +18,9 @@ class ForwardList
         void push_back(T data);
         T pop_front();
         T pop_back();
-        void insert(T data, int pos);
-        void remove(int pos);
-        T& operator[](int pos);
+        void insert(T data, int index);
+        void remove(int index);
+        T& operator[](int index);
         bool is_empty();
         int size();
         void clear();
@@ -41,7 +41,7 @@ class ForwardList
 
         Node* get_tail();
         Node* prev(Node* node);
-        Node* get_node(int pos);
+        Node* get_node(int index);
         Node* get_middle(Node* start);
 };
 
@@ -147,14 +147,14 @@ T ForwardList<T>::pop_back()
 }
 
 template <typename T>
-void ForwardList<T>::insert(T data, int pos)
+void ForwardList<T>::insert(T data, int index)
 {
-    if (pos < 0 or nodes <= pos)
+    if (index < 0 or nodes <= index)
         throw runtime_error("Forward list index out of range");
 
     auto node = new Node(data);
-    auto prev_node = get_node(pos - 1);
-    auto next_node = get_node(pos);
+    auto prev_node = get_node(index - 1);
+    auto next_node = get_node(index);
 
     prev_node->next = node;
     node->next = next_node;
@@ -162,18 +162,18 @@ void ForwardList<T>::insert(T data, int pos)
 }
 
 template <typename T>
-void ForwardList<T>::remove(int pos)
+void ForwardList<T>::remove(int index)
 {
-    if (pos < 0 or nodes <= pos)
+    if (index < 0 or nodes <= index)
         throw runtime_error("Forward list index out of range");
-    if (pos == 0) 
+    if (index == 0) 
         pop_front();
-    else if (pos == nodes - 1) 
+    else if (index == nodes - 1) 
         pop_back();
     else {
-        auto node = get_node(pos);
-        auto prev_node = get_node(pos - 1);
-        auto next_node = get_node(pos + 1);
+        auto node = get_node(index);
+        auto prev_node = get_node(index - 1);
+        auto next_node = get_node(index + 1);
         prev_node->next = next_node;
         delete node;
         --nodes;
@@ -181,11 +181,11 @@ void ForwardList<T>::remove(int pos)
 }
 
 template <typename T>
-T& ForwardList<T>::operator[](int pos)
+T& ForwardList<T>::operator[](int index)
 {
-    if (pos < 0 or nodes <= pos)
+    if (index < 0 or nodes <= index)
         throw runtime_error("Forward list index out of range");
-    auto node = get_node(pos);
+    auto node = get_node(index);
     return node->data;
 }
 
@@ -242,10 +242,10 @@ ForwardList<T>::Node* ForwardList<T>::prev(Node* node)
 }
 
 template <typename T>
-ForwardList<T>::Node* ForwardList<T>::get_node(int pos)
+ForwardList<T>::Node* ForwardList<T>::get_node(int index)
 {
     auto node = head;
-    while(pos--){
+    while(index--){
         node = node->next;
     }
     return node;

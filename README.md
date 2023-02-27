@@ -116,7 +116,9 @@ Para la consulta de datos eficiente de la Blockchain, las transacciones han sido
 
 - **Search**: para esta consulta se utilizó un de `ChainHash` implementado como array de `ForwardList`.
 - **RangeSearh, MaxValue y MinValue**: para estas 3 consultas se utilizó un `B+ Tree`. 
-- **StartWith y Contains**: Para estas 2 consultas se utilizó un `Trie (Prefix tree)` y un `Trie (Suffix tree)`, respectivamente.
+- **StartWith y Contains**: Para estas 2 consultas se utilizó un `Trie (Prefix tree)` y un `Suffix tree`, respectivamente.
+
+La Blockchain posee un atributo de tipo Index. Este se encarga de gestionar las estructuras de datos de indexación y utilizarlas en las consultas de información que el usuario realice. 
 
 ```cpp
 template <typename T>
@@ -163,8 +165,8 @@ Por otro lado, el siguiente análisis empírico muestra el impacto de indexació
  
 
 ## 8. Referencias bibliográficas
-
-
+- Brownworth A. (2016). Blockchain 101 - A Visual Demo [Video]. YouTube. Recuperado el 30 de enero del 2022 en: https://www.youtube.com/watch?v=_160oMzblY8
+- Sean Han (2017). How does blockchain really work? I built an app to show you. Recuperado el 4 de febrero del 2022 en: https://www.freecodecamp.org/news/how-does-blockchain-really-work-i-built-an-app-to-show-you-6b70cd4caf7d/
 
 
 
