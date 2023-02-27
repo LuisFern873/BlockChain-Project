@@ -110,15 +110,15 @@ bool Block<T, N>::mine()
 
 ## 5. Estructuras de datos de indexación y consultas
 
-Para la consulta de datos eficiente de la Blockchain, las transacciones han sido indexadas con distintas estructuras de datos como se muestra en la imagen:
+Para la consulta de información eficiente de la Blockchain, las transacciones han sido indexadas con distintas estructuras de datos como se muestra en la imagen:
 ![](assets/schema.png "Schema")
 
+- **search**: para esta consulta se utilizó un de `ChainHash` implementado como array de `ForwardList`.
+- **range_search, max_value y min_value**: para estas 3 consultas se utilizó un `B+ Tree`. 
+- **starts_with**: Para esta consulta se utilizó un `Trie (Prefix tree)`.
+- **contains**: Para esta consulta se utilizó el algoritmo de `Boyer Moore` con los datos almacenados en un `ForwardList`.
 
-- **Search**: para esta consulta se utilizó un de `ChainHash` implementado como array de `ForwardList`.
-- **RangeSearh, MaxValue y MinValue**: para estas 3 consultas se utilizó un `B+ Tree`. 
-- **StartWith y Contains**: Para estas 2 consultas se utilizó un `Trie (Prefix tree)` y un `Suffix tree`, respectivamente.
-
-La Blockchain posee un atributo de tipo Index. Este se encarga de gestionar las estructuras de datos de indexación y utilizarlas en las consultas de información que el usuario realice. 
+Todas estas estructuras de datos de indexación son gestionadas adecuadamente en la clase `Index`, encargada también de utilizarlas en las consultas de información que el usuario realice. 
 
 ```cpp
 template <typename T>
@@ -141,11 +141,11 @@ class Index
         ~Index() = default;
 
     private:
-        ChainHash<string, T*> sender_index;
-        ChainHash<string, T*> receiver_index;
         BPlusTree<double, T*> amount_index;
-        Trie<T*> prefix_sender_index;
-        Trie<T*> prefix_receiver_index;
+        ChainHash<string, T*> sender_index, receiver_index;
+        Trie<T*> prefix_sender_index, prefix_receiver_index;
+        ForwardList<pair<string, T*>> senders, receivers;
+        bool boyer_moore(string text, string pattern);
 };
 ```
 
@@ -161,7 +161,7 @@ Por otro lado, el siguiente análisis empírico muestra el impacto de indexació
 ## 7. Conclusiones
 
 - El uso de estructuras de datos permite el óptimo performance de la presente aplicación bancaria.
-- Estructuras de indexación permiten el acceso rápido y eficiente a los datos de la blockchain.
+- Estructuras de indexación permiten el acceso rápido y eficiente a los datos de la Blockchain.
  
 
 ## 8. Referencias bibliográficas
