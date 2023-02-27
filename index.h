@@ -12,63 +12,108 @@ using namespace std;
 
 enum class Member { sender, receiver };
 
-// template <typename T, size_t N>
+template <typename T>
 class Index
 {
     public:
-        void create_index(Block<Transfer, 5>* block);
-        void remove_index(Block<Transfer, 5>* block, size_t id_feacture);
-        void update_index(Block<Transfer, 5>* block, size_t id_feacture);
+        void create_index(Block<T>* block);
+        void remove_index(Block<T>* block);
+        void create_index(T* transfer);
+        void remove_index(T* transfer);
 
-        Transfer search(Member member, string key);
-        vector<Transfer*> range_search(double start, double end);
-        vector<Transfer*> starts_with(Member member, string prefix);
-        vector<Transfer*> contains(Member member, string pattern);
-        Transfer max_value();
-        Transfer min_value();
+        T search(Member member, string key);
+        vector<T*> range_search(double start, double end);
+        vector<T*> starts_with(Member member, string prefix);
+        vector<T*> contains(Member member, string pattern);
+        T max_value();
+        T min_value();
 
         Index() = default;
         ~Index() = default;
 
     private:
-        ChainHash<string, Transfer*> sender_index;
-        ChainHash<string, Transfer*> receiver_index;
-        BPlusTree<double, Transfer*> amount_index;
-        Trie<Transfer*> prefix_sender_index;
-        Trie<Transfer*> prefix_receiver_index;
+        ChainHash<string, T*> sender_index;
+        ChainHash<string, T*> receiver_index;
+        BPlusTree<double, T*> amount_index;
+        Trie<T*> prefix_sender_index;
+        Trie<T*> prefix_receiver_index;
 };
 
-void Index::create_index(Block<Transfer, 5>* block)
+template <typename T>
+void Index<T>::create_index(Block<T, 5>* block)
 {
+    T* pointer;
     string sender;
     string receiver;
     double amount;
-    Transfer* ptr;
 
     for (int i = 0; i < block->size(); ++i) 
     {
-        sender = block->data[i].get_sender();
-        receiver = block->data[i].get_receiver();
-        amount = block->data[i].get_amount();
-        ptr = &block->data[i];
+        pointer = &block->data[i];
+        sender = pointer->get_sender();
+        receiver = pointer->get_receiver();
+        amount = pointer->get_amount();
 
         // Hash index
-        sender_index.insert(sender, ptr);
-        receiver_index.insert(receiver, ptr);
+        sender_index.insert(sender, pointer);
+        receiver_index.insert(receiver, pointer);
         // B+ tree index
-        amount_index.insert(amount, ptr);
+        amount_index.insert(amount, pointer);
         // Prefix tree index
-        prefix_sender_index.insert(sender, ptr);
-        prefix_receiver_index.insert(receiver, ptr);
+        prefix_sender_index.insert(sender, pointer);
+        prefix_receiver_index.insert(receiver, pointer);
     }
 }
 
-void Index::remove_index(Block<Transfer, 5>* block, size_t id_feacture)
+template <typename T>
+void Index<T>::remove_index(Block<T, 5>* block)
 {
-    Transfer transfer = block->data[id_feacture];
-    string sender = transfer.get_sender();
-    string receiver = transfer.get_receiver();
-    double amount = transfer.get_amount();
+    T* pointer;
+    string sender;
+    string receiver;
+    double amount;
+
+    for (int i = 0; i < block->size(); ++i) 
+    {
+        pointer = &block->data[i];
+        sender = pointer->get_sender();
+        receiver = pointer->get_receiver();
+        amount = pointer->get_amount();
+
+        // Hash index
+        sender_index.remove(sender);
+        receiver_index.remove(receiver);
+        // B+ tree index
+        amount_index.remove(amount);
+        // Prefix tree index
+        prefix_sender_index.remove(sender);
+        prefix_receiver_index.remove(receiver);
+    }
+}
+
+template <typename T>
+void Index<T>::create_index(T* transfer)
+{
+    string sender = transfer->get_sender();
+    string receiver = transfer->get_receiver();
+    double amount = transfer->get_amount();
+
+    // Hash index
+    sender_index.insert(sender, transfer);
+    receiver_index.insert(receiver, transfer);
+    // B+ tree index
+    amount_index.insert(amount, transfer);
+    // Prefix tree index
+    prefix_sender_index.insert(sender, transfer);
+    prefix_receiver_index.insert(receiver, transfer);
+}
+
+template <typename T>
+void Index<T>::remove_index(T* transfer)
+{
+    string sender = transfer->get_sender();
+    string receiver = transfer->get_receiver();
+    double amount = transfer->get_amount();
 
     // Hash index
     sender_index.remove(sender);
@@ -78,22 +123,10 @@ void Index::remove_index(Block<Transfer, 5>* block, size_t id_feacture)
     // Prefix tree index
     prefix_sender_index.remove(sender);
     prefix_receiver_index.remove(receiver);
-
-    cout << "The following transfer has been removed successfully from the index. ✅\n";
-    cout << transfer << "\n";
 }
 
-void Index::update_index(Block<Transfer, 5>* block, size_t id_feacture)
-{
-    Transfer transfer = block->data[id_feacture];
-    string sender = transfer.get_sender();
-    string receiver = transfer.get_receiver();
-    double amount = transfer.get_amount();
-
-    
-}
-
-Transfer Index::search(Member member, string key)
+template <typename T>
+T Index<T>::search(Member member, string key)
 {
     switch (member)
     {
@@ -106,18 +139,20 @@ Transfer Index::search(Member member, string key)
     }
 }
 
-vector<Transfer*> Index::range_search(double start, double end)
+template <typename T>
+vector<T*> Index<T>::range_search(double start, double end)
 {
     return amount_index.rangeSearch(start, end);
 }
 
-vector<Transfer*> Index::starts_with(Member member, string prefix)
+template <typename T>
+vector<T*> Index<T>::starts_with(Member member, string prefix)
 {
-    static auto get_sender = [](Transfer* transfer) { 
+    static auto get_sender = [](T* transfer) { 
         return transfer->get_sender(); 
     };
 
-    static auto get_receiver = [](Transfer* transfer) { 
+    static auto get_receiver = [](T* transfer) { 
         return transfer->get_receiver(); 
     };
 
@@ -132,17 +167,20 @@ vector<Transfer*> Index::starts_with(Member member, string prefix)
     }
 }
 
-vector<Transfer*> Index::contains(Member member, string prefix)
+template <typename T>
+vector<T*> Index<T>::contains(Member member, string prefix)
 {
-    return vector<Transfer*>();
+    return vector<T*>();
 }
 
-Transfer Index::max_value()
+template <typename T>
+T Index<T>::max_value()
 {
     return *amount_index.max();
 }
 
-Transfer Index::min_value()
+template <typename T>
+T Index<T>::min_value()
 {
     return *amount_index.min();
 }

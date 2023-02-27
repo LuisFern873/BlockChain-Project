@@ -17,7 +17,7 @@ class Menu
     private:
         inline static Menu* menu = nullptr;
         inline static BlockChain<Transfer>* chain;
-        inline static Index* index;
+        inline static Index<Transfer>* index;
 
         Menu() = default;
         struct Capybara {
@@ -114,8 +114,8 @@ void Menu::display_create()
 
 void Menu::display_update()
 {
-    size_t id_block;
-    size_t id_transaction;
+    int id_block;
+    int id_transaction;
     cout << "Id block: ";
     cin >> id_block;
     cout << "Id transaction: ";
@@ -142,8 +142,8 @@ void Menu::display_update()
 
 void Menu::display_delete()
 {
-    size_t id_block;
-    size_t id_transaction;
+    int id_block;
+    int id_transaction;
     cout << "Id block: ";
     cin >> id_block;
     cout << "Id transaction: ";

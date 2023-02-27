@@ -1,6 +1,7 @@
 # include "blockchain.h"
 # include <fstream>
 # include <sstream>
+# include <thread>
 # include "structures/circulararray.h"
  
 using namespace std;
@@ -47,8 +48,16 @@ void DataManager::simulate(string filename, BlockChain<Transfer>& chain)
     ifstream file(filename);
 
     int counter = 0;
-    while (getline(file, line) and counter < 4)
+    static int skips = 0;
+    static int limit = skips + 4;
+
+    while (getline(file, line) and counter < limit)
     {
+        if (counter < skips) {
+            ++counter;
+            continue;
+        }
+
         istringstream iss(line);
 
         CircularArray<string, 3> fields;
@@ -67,6 +76,10 @@ void DataManager::simulate(string filename, BlockChain<Transfer>& chain)
 
         ++counter;
     }
+    skips += 4;
+    limit += 4;
+
+    this_thread::sleep_for(2000ms);
 
     file.close();
     cout << "The transfer was completed successfully. ✅\n";

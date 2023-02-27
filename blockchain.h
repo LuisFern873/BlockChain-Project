@@ -6,39 +6,37 @@
 # include "index.h"
 # include "structures/doublelist.h"
 
-template <typename T, size_t N = 5>
+template <typename T>
 class BlockChain
 {
     public:
         BlockChain();
-        void insert(T feature);
-        void update(T new_feature, size_t id_block, size_t id_feature);
-        void remove(size_t id_block, size_t id_feature);
+        void insert(T transfer);
+        void update(T new_transfer, int id_block, int id_transfer);
+        void remove(int id_block, int id_transfer);
         void display();
         int size();
-
-        Index* index;
+        Index<T>* index;
 
     private:
-        DoubleList<Block<T, N>*> chain;
-        Block<T, N>* current;
-
+        DoubleList<Block<T>*> chain;
+        Block<T>* current;
         void create_genesis();
 };
 
-template <typename T, size_t N>
-BlockChain<T, N>::BlockChain()
+template <typename T>
+BlockChain<T>::BlockChain()
 {
     create_genesis();
-    current = new Block<T, N>();
+    current = new Block<T>();
     current->id = 1;
-    index = new Index();
+    index = new Index<T>();
 }
 
-template <typename T, size_t N>
-void BlockChain<T, N>::insert(T feature)
+template <typename T>
+void BlockChain<T>::insert(T transfer)
 {
-    current->insert(feature);
+    current->insert(transfer);
 
     if (!current->data.is_full())
         return;
@@ -52,44 +50,49 @@ void BlockChain<T, N>::insert(T feature)
     else
         throw runtime_error("Block not mined");
 
-    current = new Block<T, N>();
+    current = new Block<T>();
     current->id = chain.size();
 }
 
-template <typename T, size_t N>
-void BlockChain<T, N>::update(T new_feature, size_t id_block, size_t id_feature)
+template <typename T>
+void BlockChain<T>::update(T new_transfer, int id_block, int id_transfer)
 {
+    new_transfer.id_block = id_block;
     // O(size): find block position
     auto iterator = chain.begin();
     while ((*iterator)->id != id_block)
         ++iterator;
 
-    // O(N) + O(1): find feature and replace feature
-    (*iterator)->data[id_feature] = new_feature;
+    // O(N) + O(1): find transfer and replace transfer
+    Transfer* transfer = &(*iterator)->data[id_transfer];
+    index->remove_index(transfer);
+    *transfer = new_transfer;
+    index->create_index(&new_transfer);
 
     // O(size - position): Remining from updated block to the last block
     while (iterator != nullptr) {
         if ((*iterator)->mine())
-            cout << "Block " << (*iterator)->id << " remined successfully\n";
+            cout << "Block " << (*iterator)->id << " remined successfully. ✔️\n";
         else
             throw runtime_error("Block not remined");
 
         (*++iterator)->previous_hash = (*--iterator)->hash;
         ++iterator;
     }
+    cout << "The transfer has been updated successfully. ✅\n";
 }
 
-template <typename T, size_t N>
-void BlockChain<T, N>::remove(size_t id_block, size_t id_feature)
+template <typename T>
+void BlockChain<T>::remove(int id_block, int id_transfer)
 {
-    // Just remove from index
-    Block<T, N>* block = chain[id_block];
-
-    index->remove_index(block, id_feature);
+    Transfer* transfer = &chain[id_block]->data[id_transfer];
+    index->remove_index(transfer);
+    cout << "The following transfer has been removed successfully from the index. ✅\n";
+    cout << *transfer << "\n";
 }
 
-template <typename T, size_t N>
-void BlockChain<T, N>::display()
+template <typename T>
+void BlockChain<T>::display()
 {
     auto iterator = chain.end();
     for (int i = 0; i < 10; ++i) {
@@ -99,10 +102,10 @@ void BlockChain<T, N>::display()
     }
 }
 
-template <typename T, size_t N>
-void BlockChain<T, N>::create_genesis()
+template <typename T>
+void BlockChain<T>::create_genesis()
 {
-    auto genesis = new Block<T, N>();
+    auto genesis = new Block<T>();
 
     while (!genesis->data.is_full())
         genesis->insert(T());
@@ -114,8 +117,8 @@ void BlockChain<T, N>::create_genesis()
         throw runtime_error("Block not mined");  
 }
 
-template <typename T, size_t N>
-int BlockChain<T, N>::size()
+template <typename T>
+int BlockChain<T>::size()
 {
     return chain.size();
 }

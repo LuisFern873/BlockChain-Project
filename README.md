@@ -13,7 +13,59 @@ Blockchain es una tecnología que ha impulsado el comercio de criptomonedas debi
 
 
 ## 3. Estructuras de datos de la Blockchain
+Para el almacenamiento de transferencias dentro del bloque se hizo uso de un `CircularArray`:
 
+```cpp
+template <typename T, int N = 5>
+class Block
+{
+    public:
+        int id;
+        int nonce;
+        CircularArray<T, N> data{}; 
+        string hash;
+        string previous_hash;
+        bool is_valid;
+
+        Block();
+        ~Block() = default;
+        void insert(T feature);
+        void remove(int index);
+        void set_nonce(int new_nonce);
+        bool mine();
+        int size();
+
+        template <typename T1, int N1>
+        friend ostream& operator<<(ostream& os, const Block<T1,N1>& block);
+
+    private:
+        void update_hash();
+};
+```
+
+Asimismo, los bloques en la Blockchain han sido gestionados por una `DoubleList` (lista doblemente enlazada).
+
+```cpp
+template <typename T>
+class BlockChain
+{
+    public:
+        BlockChain();
+        void insert(T transfer);
+        void update(T new_transfer, int id_block, int id_transfer);
+        void remove(int id_block, int id_transfer);
+        void display();
+        int size();
+
+    private:
+        DoubleList<Block<T>*> chain;
+        Block<T>* current;
+        Index<T>* index;
+        void create_genesis();
+};
+```
+
+Estas estructuras han sido seleccionadas debido a que nos otorgan acceso rápido a los datos y permiten la ejecución eficiente de los métodos de `Block` y `BlockChain`.  
 
 ## 4. Sistema de Proof-of-work
 
@@ -62,82 +114,52 @@ Para la consulta de datos eficiente de la Blockchain, las transacciones han sido
 ![](assets/schema.png "Schema")
 
 
-### EqualTo
-Para esta consulta se utilizó un de `ChainHash` implementado con array de `ForwardList`.
+- **Search**: para esta consulta se utilizó un de `ChainHash` implementado como array de `ForwardList`.
+- **RangeSearh, MaxValue y MinValue**: para estas 3 consultas se utilizó un `B+ Tree`. 
+- **StartWith y Contains**: Para estas 2 consultas se utilizó un `Trie (Prefix tree)` y un `Trie (Suffix tree)`, respectivamente.
 
 ```cpp
-template <typename TK, typename TV>
-class ChainHash
+template <typename T>
+class Index
 {
-	public:
-    	ChainHash();
-		~ChainHash();
-		void insert(TK key, TV value);
-		void remove(TK key);
-		TV find(TK key);
-		void display();
+    public:
+        void create_index(Block<T>* block);
+        void remove_index(Block<T>* block);
+        void create_index(T* transfer);
+        void remove_index(T* transfer);
 
-	private:
-		struct Entry {
-			TK key;
-			TV value;
+        T search(Member member, string key);
+        vector<T*> range_search(double start, double end);
+        vector<T*> starts_with(Member member, string prefix);
+        vector<T*> contains(Member member, string pattern);
+        T max_value();
+        T min_value();
 
-			Entry() = default;
-			Entry(TK key, TV value);
-		};
+        Index() = default;
+        ~Index() = default;
 
-		ForwardList<Entry>* array;
-        ...
+    private:
+        ChainHash<string, T*> sender_index;
+        ChainHash<string, T*> receiver_index;
+        BPlusTree<double, T*> amount_index;
+        Trie<T*> prefix_sender_index;
+        Trie<T*> prefix_receiver_index;
 };
 ```
 
-### RangeSearh, MaxValue y MinValue
-Para estas 3 consultas se utilizó un `B+ Tree`. 
-
-```cpp
-template <typename TK, typename TV>
-class BPlusTree
-{
-    public:
-        BPlusTree();
-        ~BPlusTree();
-        void insert(TK key, TV value);
-        void remove(TK key);
-        TV min();
-        TV max();
-        TV search(TK key);
-        vector<TV> rangeSearch(TK start, TK end);
-        void displayPretty();
-        int height();
-
-    private:
-        struct Node {
-            TK* key;
-            TV* value;
-
-            Node** children;
-            int count;
-            bool leaf;
-    
-            Node();
-            ~Node();
-        };
-
-        Node* root;
-        ...
-}
-```
-
-### StartWith y Contains
-Para estas 2 consultas se utilizó un `Trie estándar`.
-
-```cpp
-
-```
 
 ## 6. Análisis Big-O
 
+
+
+
+Por otro lado, el siguiente análisis empírico muestra el impacto de indexación de datos sobre los tiempos de acceso.
+
+
 ## 7. Conclusiones
+
+- El uso de estructuras de datos permite el óptimo performance de la presente aplicación bancaria.
+- Estructuras de indexación permiten el acceso rápido y eficiente a los datos de la blockchain.
  
 
 ## 8. Referencias bibliográficas
