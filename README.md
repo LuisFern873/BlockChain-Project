@@ -2,6 +2,7 @@
 # CapyCoin Blockchain
 
 ![](assets/logo.png "Capyraba")
+![](assets/menu.png "Menu")
 
 ## 1. Introducción
 
