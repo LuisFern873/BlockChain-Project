@@ -2,7 +2,7 @@
 # CapyCoin Blockchain
 
 
-<img src="assets/menu.png" width="20%" height="20%"> </img>
+<img src="assets/menu.png" width="35%" height="35%"> </img>
 ![](assets/logo.png "Capyraba")
 
 ## 1. Introducción
