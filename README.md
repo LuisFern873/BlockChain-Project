@@ -5,7 +5,7 @@
 
 ## 1. Introducción
 
-Blockchain es una tecnología que ha impulsado el comercio de criptomonedas debido a su seguridad en la validación de transacciones. Siguiendo con esta tendencia, decidí crear una nueva criptomoneda llamada "CapyCoin" la cual es soportada por la Blockchain implementada en presente proyecto. Esta hace uso de distintas estructuras de datos para la indexación y el procesamiento eficiente de consultas. Al aprovechar dichas estructuras de datos personalizadas, mi Blockchain podrá manejar grandes cantidades de datos y brindar un acceso rápido y confiable a esos datos para los usuarios y las aplicaciones creadas sobre la misma.
+Blockchain es una tecnología que ha impulsado el comercio de criptomonedas debido a su seguridad en la validación de transacciones. Siguiendo con esta tendencia, decidí crear una nueva criptomoneda llamada "CapyCoin" la cual es soportada por la Blockchain implementada en el presente proyecto. Esta hace uso de distintas estructuras de datos para la indexación y el procesamiento eficiente de consultas. Al aprovechar dichas estructuras de datos personalizadas, mi Blockchain podrá manejar grandes cantidades de datos y brindar un acceso rápido y confiable a esos datos para los usuarios y las aplicaciones creadas sobre la misma.
 
 ## 2. Objetivos
 - Implementar un Blockchain que admita transacciones de criptomonedas "CapyCoin" utilizando estructuras de datos.
@@ -113,7 +113,7 @@ bool Block<T, N>::mine()
 Para la consulta de información eficiente de la Blockchain, las transacciones han sido indexadas con distintas estructuras de datos como se muestra en la imagen:
 ![](assets/schema.png "Schema")
 
-- **search**: para esta consulta se utilizó un de `ChainHash` implementado como array de `ForwardList`.
+- **search**: para esta consulta se utilizó un `ChainHash` implementado como array de `ForwardList`.
 - **range_search, max_value y min_value**: para estas 3 consultas se utilizó un `B+ Tree`. 
 - **starts_with**: Para esta consulta se utilizó un `Trie (Prefix tree)`.
 - **contains**: Para esta consulta se utilizó el algoritmo de `Boyer Moore` con los datos almacenados en un `ForwardList`.
@@ -154,6 +154,9 @@ class Index
 
 
 
+![](assets/chart1.png "chart 1")
+![](assets/chart2.png "chart 2")
+![](assets/chart3.png "chart 3")
 
 Por otro lado, el siguiente análisis empírico muestra el impacto de indexación de datos sobre los tiempos de acceso.
 

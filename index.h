@@ -116,15 +116,7 @@ void Index<T>::remove_index(T* transfer)
 template <typename T>
 T Index<T>::search(Member member, string key)
 {
-    switch (member)
-    {
-    case Member::sender:
-        return *sender_index.find(key);
-    case Member::receiver:
-        return *receiver_index.find(key);
-    default:
-        throw invalid_argument("Invalid block attribute");
-    }
+    return member == Member::sender ? *sender_index.find(key) : *receiver_index.find(key);
 }
 
 template <typename T>
