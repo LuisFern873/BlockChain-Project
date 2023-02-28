@@ -79,10 +79,10 @@ A cada bloque se le asigna un código hash de acuerdo a su contenido (historial 
 ![](assets/hash.png "Sha256")
 
 ```cpp
-template <typename T, size_t N>
+template <typename T, int N>
 void Block<T, N>::update_hash()
 {
-    static Sha256<CircularArray<T, N>, size_t> hasher{};
+    static Sha256<CircularArray<T, N>, int> hasher{};
     hash = hasher(data, nonce);
     is_valid = hash.starts_with("00");
 }
@@ -91,14 +91,14 @@ void Block<T, N>::update_hash()
 Para que el bloque sea válido su código hash debe empezar con 2 ceros. De este modo, el método mine busca el nonce adecuado para que este criterio se cumpla.
 
 ```cpp
-template <typename T, size_t N>
+template <typename T, int N>
 bool Block<T, N>::mine()
 {
     if (!data.is_full())
         throw runtime_error("Mining a non full block is not allowed");
-
-    size_t nonce = 0;
-    const size_t MAX_NONCE = 1'000'000;
+    
+    int nonce = 0;
+    const int MAX_NONCE = 1'000'000;
 
     while (nonce < MAX_NONCE) {
         set_nonce(nonce);
