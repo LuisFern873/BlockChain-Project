@@ -150,22 +150,54 @@ class Index
 ```
 
 
-## 6. Análisis Big-O
+## 6. The power of indexing
 
+A continuación, se muestran los resultados de una experimentación donde se compara el tiempo de ejecución de algunas consultas utilizando las estructuras de indexación y obviándolas realizando una búsqueda lineal. 
 
+- **search**: Hash index vs Linear search
+
+| Input size (blocks) | Hash index time (ms) | Linear search time (ms) |
+| --------------------| -------------------- | ----------------------- |
+| 10                  | 2 | 5 |
+| 100                 | 3 | 25 |
+| 1 000               | 2 | 182 |
+| 10 000              | 3 | 461 |
+| 100 000             | 3 | 2 190 |
 
 ![](assets/chart1.png "chart 1")
+
+- **range_search**: B+ Tree index vs Linear search
+
+| Input size (blocks) | B+ Tree index time (ms) | Linear search time (ms) |
+| --------------------| ----------------------- | ----------------------- |
+| 10                  | 1 | 205 |
+| 100                 | 3 | 2 625 |
+| 1 000               | 9 | 2 308 |
+| 10 000              | 84 | 29 229 |
+| 100 000             | 405 | 211 980 |
+
 ![](assets/chart2.png "chart 2")
+
+- **starts_with**: Trie index vs Linear search
+
+| Input size (blocks) | Trie index time (ms) | Linear search time (ms) |
+| --------------------| ----------------------- | ----------------------- |
+| 10                  | 2 | 194 |
+| 100                 | 4 | 156 |
+| 1 000               | 32 | 2 863 |
+| 10 000              | 45 | 6 388 |
+| 100 000             | 118 | 18 012 |
+
 ![](assets/chart3.png "chart 3")
 
-Por otro lado, el siguiente análisis empírico muestra el impacto de indexación de datos sobre los tiempos de acceso.
-
+Este análisis empírico muestra el impacto de la indexación de datos sobre los tiempos de acceso.
 
 ## 7. Conclusiones
 
-- El uso de estructuras de datos permite el óptimo performance de la presente aplicación bancaria.
+Culminado el presente proyecto, se llegaron a las siguientes conclusiones:
+- El uso de estructuras de datos en la implementación de la Blockchain permite el óptimo performance de la aplicación bancaria.
 - Estructuras de indexación permiten el acceso rápido y eficiente a los datos de la Blockchain.
- 
+
 
 ## 8. Referencias bibliográficas
 - Brownworth A. (2016). Blockchain 101 - A Visual Demo [Video]. YouTube. Recuperado el 30 de enero del 2022 en: https://www.youtube.com/watch?v=_160oMzblY8

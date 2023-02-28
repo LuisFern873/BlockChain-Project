@@ -6,7 +6,7 @@ int main()
 {
     BlockChain<Transfer> chain;
 
-    DataManager::load("assets/10000_transfers.csv", chain);
+    DataManager::load("assets/1000_transfers.csv", chain);
 
     auto menu = Menu<Transfer>::init(chain);
     menu->display_main();
