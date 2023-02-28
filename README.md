@@ -9,7 +9,7 @@ Blockchain es una tecnología que ha impulsado el comercio de criptomonedas debi
 
 ## 2. Objetivos
 - Implementar un Blockchain que admita transacciones de criptomonedas "CapyCoin" utilizando estructuras de datos.
-- Utilizar estructuras de datos de indexación como hash tables y B+ trees para el acceso rápido a la información contenida en la Blockchain.
+- Utilizar estructuras de datos de indexación como Hash tables, B+ Trees y Tries para el acceso rápido a la información contenida en la Blockchain.
 
 
 ## 3. Estructuras de datos de la Blockchain
@@ -130,12 +130,12 @@ class Index
         void create_index(T* transfer);
         void remove_index(T* transfer);
 
-        T search(Member member, string key);
+        T* search(Member member, string key);
         vector<T*> range_search(double start, double end);
         vector<T*> starts_with(Member member, string prefix);
         vector<T*> contains(Member member, string pattern);
-        T max_value();
-        T min_value();
+        T* max_value();
+        T* min_value();
 
         Index() = default;
         ~Index() = default;
