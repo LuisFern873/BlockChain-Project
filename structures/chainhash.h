@@ -86,7 +86,7 @@ TV ChainHash<TK,TV>::find(TK key)
 		if(chain[i].key == key)
 			return chain[i].value;
 	}
-	throw out_of_range("Key not found.");
+	return nullptr;
 }
 
 template <typename TK, typename TV>

@@ -21,12 +21,12 @@ class Index
         void create_index(T* transfer);
         void remove_index(T* transfer);
 
-        T search(Member member, string key);
+        T* search(Member member, string key);
         vector<T*> range_search(double start, double end);
         vector<T*> starts_with(Member member, string prefix);
         vector<T*> contains(Member member, string pattern);
-        T max_value();
-        T min_value();
+        T* max_value();
+        T* min_value();
 
         Index() = default;
         ~Index() = default;
@@ -114,9 +114,9 @@ void Index<T>::remove_index(T* transfer)
 }
 
 template <typename T>
-T Index<T>::search(Member member, string key)
+T* Index<T>::search(Member member, string key)
 {
-    return member == Member::sender ? *sender_index.find(key) : *receiver_index.find(key);
+    return member == Member::sender ? sender_index.find(key) : receiver_index.find(key);
 }
 
 template <typename T>
@@ -156,15 +156,15 @@ vector<T*> Index<T>::contains(Member member, string pattern)
 }
 
 template <typename T>
-T Index<T>::max_value()
+T* Index<T>::max_value()
 {
-    return *amount_index.max();
+    return amount_index.max();
 }
 
 template <typename T>
-T Index<T>::min_value()
+T* Index<T>::min_value()
 {
-    return *amount_index.min();
+    return amount_index.min();
 }
 
 template <typename T>

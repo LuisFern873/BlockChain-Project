@@ -224,9 +224,13 @@ void Menu<T>::display_search()
     cin >> name;
     cout << "\n";
 
-    T transfer = index->search(member, name);
-    cout << "Id block: " << transfer.id_block << "\n";
-    cout << transfer << "\n";
+    T* transfer = index->search(member, name);
+    if (transfer != nullptr) {
+        cout << "Id block: " << transfer->id_block << "\n";
+        cout << *transfer << "\n";
+    } else {
+        cout << "Key not found.\n";
+    }
 
     pause();
     display_request();
@@ -309,10 +313,10 @@ void Menu<T>::display_contains()
 template <typename T>
 void Menu<T>::display_max()
 {
-    T transfer = index->max_value();
+    T* transfer = index->max_value();
 
-    cout << "Id block: " << transfer.id_block << "\n"; 
-    cout << transfer << "\n";
+    cout << "Id block: " << transfer->id_block << "\n"; 
+    cout << *transfer << "\n";
 
     pause();
     display_request();
@@ -321,10 +325,10 @@ void Menu<T>::display_max()
 template <typename T>
 void Menu<T>::display_min()
 {
-    T transfer = index->min_value();
+    T* transfer = index->min_value();
 
-    cout << "Id block: " << transfer.id_block << "\n"; 
-    cout << transfer << "\n";
+    cout << "Id block: " << transfer->id_block << "\n"; 
+    cout << *transfer << "\n";
 
     pause();
     display_request();
